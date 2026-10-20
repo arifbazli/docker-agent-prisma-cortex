@@ -15,6 +15,12 @@ scripts/run.sh "Why migrate from Prisma Cloud to Cortex Cloud?"
 
 A run takes about 5-8 minutes. Answer `a` at the first fetch prompt, or use `YOLO=1 scripts/run.sh "..."` to skip prompts.
 
+To run the Cortex Cloud-only agent instead (see [Agents](#agents) below):
+
+```bash
+CFG='agents/#2Cortex-Cloud-Hub.yaml' scripts/run.sh "What does Cortex Cloud AI-SPM monitor?"
+```
+
 Without the wrapper:
 
 ```bash
@@ -91,7 +97,8 @@ docs/      notes
 
 | File | Purpose |
 |---|---|
-| `agents/#1Prisma-Cortex-Product-Hub.yaml` | Main pipeline (above) |
+| `agents/#1Prisma-Cortex-Product-Hub.yaml` | Main pipeline (above): broad PANW scope, deepest on Prisma Cloud + Cortex Cloud |
+| `agents/#2Cortex-Cloud-Hub.yaml` | Cortex Cloud only (CSPM, CWPP, CIEM, AppSec, AI-SPM, Platform/data lake); Prisma Cloud appears only as migration context. Run with `CFG='agents/#2Cortex-Cloud-Hub.yaml' scripts/run.sh "..."` |
 | `agents/20-pan-research.yaml` | Earlier version, kept for comparison |
 | `agents/local.yaml`, `02-*`, `03-*`, `04-*` | Earlier experiments: single agent, file reader, team, writer/critic |
 
