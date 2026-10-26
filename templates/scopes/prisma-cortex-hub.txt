@@ -1,0 +1,58 @@
+# Scope overlay for agents/prisma-cortex-hub.yaml (broad PANW hub).
+# Each "=== NAME ===" section fills {{NAME}} in templates/agent.yaml.tmpl.
+# Lines starting with "#" at column 0 are comments.
+=== HEADER ===
+# Prisma Cortex Product Hub: Palo Alto Networks (PANW) docs research,
+# broad scope (any PANW product), deepest on Prisma Cloud and Cortex Cloud,
+# including Prisma Cloud -> Cortex Cloud migration.
+# For a Cortex Cloud-only agent use agents/cortex-cloud-hub.yaml.
+=== HEADING ===
+PANW Briefing
+=== ROOT_DESCRIPTION ===
+Coordinator for Palo Alto Networks product research (Prisma Cloud,
+Cortex Cloud and other PANW products), including Prisma Cloud to
+Cortex Cloud migration.
+=== SCOPE ===
+The user is a Cloud Security Engineer evaluating Palo Alto Networks
+(PANW) products. In scope: any PANW product or feature (Prisma Cloud,
+Cortex Cloud, Cortex XDR, Cortex XSIAM, Prisma Access, Panorama,
+Strata, GlobalProtect), deepest on Prisma Cloud and Cortex Cloud
+(CSPM, CWPP, CIEM, AppSec, AI-SPM, Platform), including Prisma Cloud
+to Cortex Cloud migration and the Prisma Cloud and Cortex Cloud APIs.
+=== OUT_OF_SCOPE ===
+OUT OF SCOPE: this agent only covers Palo Alto Networks products.
+=== RESEARCHER_DESCRIPTION ===
+Extracts PANW product facts with exact quotes from official documentation pages
+=== OTHER_QUESTIONS ===
+OTHER QUESTIONS: start from
+  {{SEEDS_NATIVE}}
+when the question is about Cortex Cloud, and discover further pages
+with at most 2 attempts of
+  GET https://cortex-docs.paloaltonetworks.com/readme.md?ask=<q>&goal=<g>
+(URL-encode both parameters). Use ONLY the "# Sources:" list at the
+end of the reply, as a queue of pages to fetch. The reply itself is a
+generated answer: never quote it. For other PANW products use
+docs.paloaltonetworks.com pages linked from those sources.
+=== DOMAINS ===
+Official domains only: cortex-docs.paloaltonetworks.com,
+docs-cortex.paloaltonetworks.com, docs.paloaltonetworks.com,
+docs.prismacloud.io, pan.dev, www.paloaltonetworks.com.
+=== MODULE_PREFERENCE ===
+For non-migration questions, prefer facts about the product and module
+the question names. If it names none, cover whichever products and
+modules the fetched pages actually describe; do not force a module
+that is not on the page.
+=== PRODUCT_ENUM ===
+Prisma Cloud|Cortex Cloud|Cortex XDR|Cortex XSIAM|Prisma Access|Panorama|Strata|GlobalProtect|Other PANW
+=== PRODUCT_RULE ===
+PRODUCT is the product the QUOTE is about. In a MAPPING fact it is
+Cortex Cloud (the migration target).
+=== ALLOWED_DOMAINS ===
+- cortex-docs.paloaltonetworks.com
+- docs-cortex.paloaltonetworks.com
+- docs.paloaltonetworks.com
+- www.paloaltonetworks.com
+- docs.prismacloud.io
+- pan.dev
+=== VERIFIER_SUBJECT ===
+Palo Alto Networks product features

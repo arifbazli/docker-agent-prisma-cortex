@@ -1,0 +1,8 @@
+# Prisma Cloud -> Cortex Cloud migration seed pages, fetched in this order.
+# One URL per line; blank lines and lines starting with '#' are ignored.
+# Validated by scripts/check-seeds.sh (CI runs it nightly).
+https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/onboard-and-configure/deployment-steps-and-checklist/upgrade-from-prisma-cloud-to-cortex-cloud/about-the-upgrade-helper.md
+https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/onboard-and-configure/deployment-steps-and-checklist/upgrade-from-prisma-cloud-to-cortex-cloud/copy-content/copy-cortex-cloud-application-security-configurations.md
+https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/get-started/what-is-cortex-cloud.md
+https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/onboard-and-configure/deployment-steps-and-checklist/upgrade-from-prisma-cloud-to-cortex-cloud.md
+https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/onboard-and-configure/deployment-steps-and-checklist/upgrade-from-prisma-cloud-to-cortex-cloud/link-cortex-cloud-to-prisma-cloud.md

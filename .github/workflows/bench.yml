@@ -1,0 +1,35 @@
+name: bench
+# Runs the benchmark against real models. Needs a runner with Ollama signed
+# in (":cloud" models), so it only runs on a self-hosted runner, on demand
+# or weekly when the repository variable BENCH_ENABLED is "true".
+on:
+  workflow_dispatch:
+    inputs:
+      config:
+        description: Agent config
+        default: agents/prisma-cortex-hub.yaml
+  schedule:
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    if: github.event_name == 'workflow_dispatch' || vars.BENCH_ENABLED == 'true'
+    runs-on: [self-hosted, ollama]
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: run benchmark
+        env:
+          CFG: ${{ inputs.config || 'agents/prisma-cortex-hub.yaml' }}
+          TELEMETRY_ENABLED: "false"
+        run: bench/run-all.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bench-results
+          path: |
+            bench/results.tsv
+            outputs/

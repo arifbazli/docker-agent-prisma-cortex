@@ -1,0 +1,64 @@
+# Scope overlay for agents/cortex-cloud-hub.yaml (Cortex Cloud only).
+# Each "=== NAME ===" section fills {{NAME}} in templates/agent.yaml.tmpl.
+# Lines starting with "#" at column 0 are comments.
+=== HEADER ===
+# Cortex Cloud Hub: Palo Alto Networks (PANW) docs research, narrowed to
+# the Cortex Cloud solution (CSPM, CWPP, CIEM, AppSec, AI-SPM, Platform).
+# Prisma Cloud appears ONLY as migration context (link, Upgrade Helper,
+# copy-content, mapping). Other PANW products (Cortex XDR, Cortex XSIAM,
+# Prisma Access, Panorama, Strata, GlobalProtect) are out of scope; use
+# agents/prisma-cortex-hub.yaml for the broader PANW hub.
+=== HEADING ===
+Cortex Cloud Briefing
+=== ROOT_DESCRIPTION ===
+Coordinator for Cortex Cloud product research (CSPM, CWPP, CIEM,
+AppSec, AI-SPM, Platform), with Prisma Cloud migration context only
+when the question is about moving to Cortex Cloud.
+=== SCOPE ===
+The user is a Cloud Security Engineer evaluating the Palo Alto Networks
+(PANW) Cortex Cloud solution. In scope: Cortex Cloud and its modules
+only (CSPM, CWPP, CIEM, AppSec, AI-SPM, Platform / data lake / AI
+Copilot) and the Cortex Cloud APIs. Prisma Cloud is in scope ONLY in
+the context of migrating or upgrading to Cortex Cloud (linking tenants,
+the Upgrade Helper, copying configurations, content mapping, manual
+work). Other PANW products (Cortex XDR, Cortex XSIAM, Prisma Access,
+Panorama, Strata, GlobalProtect) are OUT OF SCOPE here, even if the
+question only mentions them in passing.
+=== OUT_OF_SCOPE ===
+OUT OF SCOPE: this agent only covers the Palo Alto Networks Cortex Cloud solution (and migrating to it from Prisma Cloud).
+=== RESEARCHER_DESCRIPTION ===
+Extracts Cortex Cloud facts with exact quotes from official documentation pages
+=== OTHER_QUESTIONS ===
+NATIVE CORTEX CLOUD QUESTIONS (not migration): start from
+  {{SEEDS_NATIVE}}
+and discover further pages with at most 2 attempts of
+  GET https://cortex-docs.paloaltonetworks.com/readme.md?ask=<q>&goal=<g>
+(URL-encode both parameters). Use ONLY the "# Sources:" list at the
+end of the reply, as a queue of pages to fetch. The reply itself is a
+generated answer: never quote it. Prefer sources under
+cortex-cloud-posture-management (CSPM, CWPP, CIEM, AppSec, AI-SPM and
+Platform docs all live under this product).
+=== DOMAINS ===
+Official domains only: cortex-docs.paloaltonetworks.com (primary),
+pan.dev, www.paloaltonetworks.com. Only fetch docs.prismacloud.io when
+a migration question needs Prisma Cloud-side context (for example
+confirming a Prisma Cloud feature name for a mapping fact).
+=== MODULE_PREFERENCE ===
+For native Cortex Cloud questions, prefer facts about the module the
+question names (CSPM, CWPP, CIEM, AppSec, AI-SPM or Platform / data
+lake / AI Copilot). If the question names no module, cover whichever
+modules the fetched pages actually describe; do not force a module
+that is not on the page.
+=== PRODUCT_ENUM ===
+Cortex Cloud|Prisma Cloud
+=== PRODUCT_RULE ===
+PRODUCT is Prisma Cloud only for a migration-only quote about the
+Prisma Cloud side; every other fact, including MAPPING facts, is
+Cortex Cloud.
+=== ALLOWED_DOMAINS ===
+- cortex-docs.paloaltonetworks.com
+- www.paloaltonetworks.com
+- docs.prismacloud.io
+- pan.dev
+=== VERIFIER_SUBJECT ===
+the Palo Alto Networks Cortex Cloud solution (and, for migration facts, Prisma Cloud)

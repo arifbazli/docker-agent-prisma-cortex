@@ -1,0 +1,7 @@
+# API questions (authentication, endpoints, API keys).
+# Cortex Cloud APIs are documented on cortex-docs; Prisma Cloud APIs on pan.dev.
+https://cortex-docs.paloaltonetworks.com/cortex-cloud-api/get-started-with-cortex-apis.md
+https://cortex-docs.paloaltonetworks.com/cortex-cloud-api/make-your-first-api-call.md
+https://cortex-docs.paloaltonetworks.com/cortex-cloud-api/get-your-cortex-api-key-id.md
+https://pan.dev/prisma-cloud/api/cspm/api-urls/
+https://pan.dev/prisma-cloud/api/cspm/app-login/
