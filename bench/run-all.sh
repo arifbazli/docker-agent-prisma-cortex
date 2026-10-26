@@ -2,6 +2,7 @@
 # usage: bench/run-all.sh [id ...]      (no ids = all questions)
 #   CFG=agents/cortex-cloud-hub.yaml    config to benchmark (default prisma-cortex-hub)
 #   MODE=agent                          benchmark the self-contained root agent
+#   OUT_DIR=outputs/x                   separate output dir (to run benches in parallel)
 #
 # Appends one row per question to bench/results.tsv (committed, so model or
 # prompt changes can be compared against a baseline). A question PASSes when
@@ -27,7 +28,7 @@ while IFS='|' read -r id expect must q; do
   start=$(date +%s)
   CFG="$cfg" scripts/run.sh "$q" </dev/null >/dev/null 2>&1; rc=$?
   secs=$(( $(date +%s) - start ))
-  out=$(cat outputs/.last 2>/dev/null); first=$(head -1 "$out" 2>/dev/null); note=""
+  out=$(cat "${OUT_DIR:-outputs}/.last" 2>/dev/null); first=$(head -1 "$out" 2>/dev/null); note=""
   case "$expect" in
     oos)      [[ "$first" == "OUT OF SCOPE"* ]] || { rc=1; note="expected OUT OF SCOPE, got: ${first:0:40}"; } ;;
     briefing) [[ "$first" =~ ^#\ .*Briefing: ]] || { rc=1; note="no briefing: ${first:0:40}"; }
