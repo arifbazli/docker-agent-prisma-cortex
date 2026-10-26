@@ -1,0 +1,2 @@
+# Starting page for native (non-migration) Cortex Cloud questions.
+https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/get-started/what-is-cortex-cloud.md

@@ -1,19 +1,14 @@
+# secrets
 .env
-*.log
 
-/.pi/teams/state/
-/.pi/teams/cache/
-/.pi/teams/worktrees/
-/.pi/teams/imports/
-/.pi/teams/audit/
-!/.pi/teams/artifacts/
-!/.pi/teams/graphs/run.log
-*.bak
-*.bak[0-9]*
+# run artefacts (pipeline writes these)
 logs/
 outputs/
-run.log
-briefing.md
-.pi/
 fetched/
+*.log
+
+# editors / tools
+.pi/
+__pycache__/
+*.pyc
 *.bak*

@@ -1,11 +1,19 @@
-# id|expect|question
-migrate-why|briefing|Why migrate from Prisma Cloud to Cortex Cloud?
-upgrade-helper|briefing|What does the Upgrade Helper copy from Prisma Cloud to Cortex Cloud and what needs manual work?
-link-tenants|briefing|How do I link a Prisma Cloud tenant to Cortex Cloud?
-release-latest|briefing|What is new in the latest Cortex Cloud Posture Management release?
-cspm-scope|briefing|What does Cortex Cloud Posture Management cover?
-ciem|briefing|What does Cortex Cloud Identity Security cover?
-ai-spm|briefing|What AI security capabilities does Cortex Cloud have?
-appsec-rules|briefing|What does Cortex Cloud Application Security scan for?
-xdr-itdr|briefing|What does Cortex XDR identity threat detection cover?
-oos-france|oos|What is the capital of France?
+# id|expect|must_include|question
+#
+# expect:       briefing | oos | any, or per config:
+#               prisma-cortex-hub:briefing,cortex-cloud-hub:oos
+# must_include: ';'-separated extended regexes (case-insensitive) that must
+#               all appear in the briefing. Keep them to facts the docs are
+#               unlikely to drop; they check content, not wording.
+migrate-why|briefing|Why move;Cortex Cloud|Why migrate from Prisma Cloud to Cortex Cloud?
+upgrade-helper|briefing|Upgrade Helper;Manual work|What does the Upgrade Helper copy from Prisma Cloud to Cortex Cloud and what needs manual work?
+link-tenants|briefing|link|How do I link a Prisma Cloud tenant to Cortex Cloud?
+release-latest|briefing|20[0-9][0-9]|What is new in the latest Cortex Cloud Posture Management release?
+cspm-scope|briefing|posture|What does Cortex Cloud Posture Management cover?
+ciem|briefing|identit|What does Cortex Cloud Identity Security cover?
+ai-spm|briefing|AI|What AI security capabilities does Cortex Cloud have?
+appsec-rules|briefing|scan|What does Cortex Cloud Application Security scan for?
+api-auth|briefing|API key|How do I authenticate to the Cortex Cloud public API?
+prisma-api-login|prisma-cortex-hub:briefing,cortex-cloud-hub:any|token|How do I get an auth token for the Prisma Cloud CSPM API?
+xdr-itdr|prisma-cortex-hub:briefing,cortex-cloud-hub:oos||What does Cortex XDR identity threat detection cover?
+oos-france|oos||What is the capital of France?
