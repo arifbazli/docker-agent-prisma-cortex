@@ -1,5 +1,4 @@
-docs/images/docker-agent-run-light.svg 5042 bytes
-" height="482" viewBox="0 0 960 482" role="img" aria-label="Docker Agent run: Prisma Cloud to Cortex Cloud migration briefing">
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="482" viewBox="0 0 960 482" role="img" aria-label="Docker Agent run: Prisma Cloud to Cortex Cloud migration briefing">
 <rect width="960" height="482" rx="8" fill="#ffffff" stroke="#d0d7de"/>
 <path d="M0 8a8 8 0 0 1 8-8h944a8 8 0 0 1 8 8v28H0z" fill="#f6f8fa"/>
 <circle cx="20" cy="18" r="6" fill="#ff5f56"/><circle cx="40" cy="18" r="6" fill="#ffbd2e"/><circle cx="60" cy="18" r="6" fill="#27c93f"/>
