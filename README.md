@@ -4,10 +4,7 @@
 
 Ask about **Prisma Cloud** or **Cortex Cloud** (especially migrating from Prisma Cloud to Cortex Cloud) and get a short briefing built only from official documentation. Every statement cites a page, and a script checks that the quote is really on it. Built on [docker-agent](https://github.com/docker/docker-agent) with [Ollama](https://ollama.com) models.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/docker-agent-run-dark.svg">
-  <img alt="Example run: Prisma Cloud to Cortex Cloud migration briefing" src="docs/images/docker-agent-run-light.svg">
-</picture>
+![Example run: Prisma Cloud to Cortex Cloud migration briefing](docs/images/example-run.png)
 
 ## How it works
 
@@ -97,7 +94,7 @@ Not yet tested against a live tenant. Tenant data is sent to the model provider.
 agents/     generated configs        templates/  prompt template and scopes
 seeds/      start pages              scripts/    pipeline, checks, generators
 bench/      benchmark + results      tests/      unit tests
-examples/   old experiments          docs/images README screenshot
+examples/   old experiments          docs/images README image (scripts/make-example-image.py)
 ```
 
 ## Safety and limitations
