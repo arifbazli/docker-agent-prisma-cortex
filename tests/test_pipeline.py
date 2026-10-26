@@ -94,6 +94,28 @@ class Facts(unittest.TestCase):
         self.assertEqual([f.verdict for f in facts],
                          ["", "UNSUPPORTED", "UNSUPPORTED", "UNSUPPORTED", "UNVERIFIABLE"])
         self.assertEqual(facts[0].match, "exact")
+        self.assertTrue(facts[2].dropped)
+        self.assertEqual(len(P.verdict_lines(facts)), 4)
+
+    def test_citation_corrected_when_quote_is_on_a_real_page(self):
+        ask = "https://cortex-docs.paloaltonetworks.com/readme.md?ask=q"
+        other = "https://cortex-docs.paloaltonetworks.com/x/other.md"
+        pages = [P.Page(PAGE_URL, True, 200, PAGE), P.Page(ask, True, 200, PAGE),
+                 P.Page(other, True, 200, "# Other\nNothing here.")]
+        facts = P.parse_facts("\n".join([
+            fact_line("gradual and flexible upgrade experience", url=ask),
+            fact_line("gradual and flexible upgrade experience", url=other),
+        ]))
+        P.check_quotes(facts, pages)
+        for f in facts:
+            self.assertEqual(f.verdict, "")  # goes to the judge
+            self.assertEqual(f.url, PAGE_URL)
+            self.assertIn(PAGE_URL, f.line)
+            self.assertFalse(f.dropped)
+        self.assertEqual(facts[0].cited_url, ask)
+        P.apply_judge(facts, "[1] | SUPPORTED | NOTE: none\n[2] | SUPPORTED | NOTE: ok")
+        self.assertIn("generated answer", facts[0].note)
+        self.assertIn("ok", facts[1].note)
 
     def test_judge_parsing_and_default(self):
         facts = P.parse_facts("\n".join(fact_line(q) for q in ("a", "b", "c")))

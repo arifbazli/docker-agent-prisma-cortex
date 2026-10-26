@@ -285,6 +285,7 @@ class Fact:
     note: str = ""
     match: str = ""
     dropped: bool = False  # never shown to the writer (banned URL)
+    cited_url: str = ""  # original URL if the citation was corrected
 
 
 def clean_url(url: str) -> str:
@@ -338,10 +339,28 @@ def check_quotes(facts: list[Fact], pages: list[Page]) -> None:
         k = url_key(p.url)
         if k not in by_url or (p.ok and not by_url[k].ok):
             by_url[k] = p
+    def real_pages_with(quote: str) -> list[Page]:
+        return [p for p in by_url.values()
+                if p.ok and not banned_url(p.url) and quote_on_page(quote, p.body)]
+
+    def reattribute(f: Fact, page: Page, why: str) -> None:
+        """The quote is verbatim on another real page fetched in this run:
+        cite that page instead (recorded in the evidence file)."""
+        f.cited_url = f.url
+        f.line = f.line.replace(f.url, page.url)
+        f.url = page.url
+        f.match = quote_on_page(f.quote, page.body)
+        f.note = why
+
     for f in facts:
+        quote_ok = bool(f.quote) and len(f.quote.split()) <= 40
         reason = banned_url(f.url)
         if reason:
-            f.verdict, f.note, f.dropped = "UNSUPPORTED", reason, True
+            hits = real_pages_with(f.quote) if quote_ok else []
+            if hits:
+                reattribute(f, hits[0], "cited a generated answer; quote found on this page")
+            else:
+                f.verdict, f.note, f.dropped = "UNSUPPORTED", reason, True
             continue
         page = by_url.get(url_key(f.url))
         if page is None:
@@ -353,18 +372,18 @@ def check_quotes(facts: list[Fact], pages: list[Page]) -> None:
         if not f.quote:
             f.verdict, f.note = "UNSUPPORTED", "no quote given"
             continue
-        if len(f.quote.split()) > 40:
+        if not quote_ok:
             f.verdict, f.note = "UNSUPPORTED", "quote longer than allowed"
             continue
         found = quote_on_page(f.quote, page.body)
         if found:
             f.match = found
             continue  # judge decides
-        elsewhere = [u for k, p in by_url.items() if p.ok and quote_on_page(f.quote, p.body)
-                     for u in [p.url]]
-        f.verdict = "UNSUPPORTED"
-        f.note = ("quote is on a different page than cited" if elsewhere
-                  else "quote not found on the cited page")
+        hits = real_pages_with(f.quote)
+        if hits:
+            reattribute(f, hits[0], "quote was on a different fetched page; citation corrected")
+        else:
+            f.verdict, f.note = "UNSUPPORTED", "quote not found on the cited page"
 
 
 _JUDGE_LINE = re.compile(
@@ -385,7 +404,8 @@ def apply_judge(facts: list[Fact], text: str) -> int:
             continue
         f.verdict = m.group(2).upper()
         note = (m.group(3) or "").strip()
-        f.note = "none" if not note or note.lower() in ("none", "none.") else note
+        note = "" if note.lower() in ("none", "none.") else note
+        f.note = "; ".join(x for x in (f.note, note) if x) or "none"
         applied += 1
     for f in pending.values():
         if not f.verdict:
