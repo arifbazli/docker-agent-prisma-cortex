@@ -8,6 +8,9 @@
 services:
   agent:
     build: .
+    # Run as your host user so the container can write to ./outputs, ./logs
+    # and ./fetched (set HOST_UID/HOST_GID in .env: `id -u`, `id -g`).
+    user: "${HOST_UID:-10001}:${HOST_GID:-10001}"
     image: ${IMAGE:-docker-agent-prisma-cortex:latest}
     env_file:
       - path: .env

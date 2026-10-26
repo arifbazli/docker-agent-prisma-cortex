@@ -1,45 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="770" viewBox="0 0 960 770" role="img" aria-label="Docker Agent run: Prisma Cloud to Cortex Cloud migration briefing">
-<rect width="960" height="770" rx="8" fill="#ffffff" stroke="#d0d7de"/>
+docs/images/docker-agent-run-light.svg 5042 bytes
+" height="482" viewBox="0 0 960 482" role="img" aria-label="Docker Agent run: Prisma Cloud to Cortex Cloud migration briefing">
+<rect width="960" height="482" rx="8" fill="#ffffff" stroke="#d0d7de"/>
 <path d="M0 8a8 8 0 0 1 8-8h944a8 8 0 0 1 8 8v28H0z" fill="#f6f8fa"/>
 <circle cx="20" cy="18" r="6" fill="#ff5f56"/><circle cx="40" cy="18" r="6" fill="#ffbd2e"/><circle cx="60" cy="18" r="6" fill="#27c93f"/>
 <text x="480" y="22" fill="#57606a" font-family="monospace" font-size="12" text-anchor="middle">docker-agent</text>
-<text x="20" y="52" fill="#1a7f37" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">$ docker-agent run --exec 'agents/#1Prisma-Cortex-Product-Hub.yaml' \</text>
+<text x="20" y="52" fill="#1a7f37" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">$ scripts/run.sh \</text>
 <text x="20" y="70" fill="#1a7f37" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">    "Why migrate from Prisma Cloud to Cortex Cloud?"</text>
 <text x="20" y="88" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"></text>
-<text x="20" y="106" fill="#1a7f37" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"># PANW Briefing: Prisma Cloud to Cortex Cloud Migration</text>
+<text x="20" y="106" fill="#1a7f37" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"># PANW Briefing: Why migrate to Cortex Cloud</text>
 <text x="20" y="124" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"></text>
-<text x="20" y="142" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">Bottom line: Palo Alto documents that the Upgrade Helper lets administrators copy Prisma Cloud</text>
-<text x="20" y="160" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  configurations to Cortex Cloud at their own pace.</text>
+<text x="20" y="142" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">Bottom line: Palo Alto documents that Cortex Cloud offers a platform-based, proactive security approach with</text>
+<text x="20" y="160" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  real-time capabilities, AI assistance, and consolidated reporting.</text>
 <text x="20" y="178" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"></text>
 <text x="20" y="196" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">Why move (per Palo Alto documentation)</text>
-<text x="20" y="214" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Administrators can run the Upgrade Helper at any upgrade stage and repeat it as often as needed. [1]</text>
-<text x="20" y="232" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Prisma Cloud permission groups, roles, policies, and rules map directly to corresponding Cortex Cloud</text>
-<text x="20" y="250" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  objects, reducing manual rework. [1]</text>
+<text x="20" y="214" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Cortex Cloud delivers a platform-based, proactive security approach. [1]</text>
+<text x="20" y="232" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Cortex Cloud provides real-time cloud security that enables investigation and remediation. [1]</text>
+<text x="20" y="250" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Cortex Cloud includes an AI Copilot across the platform to simplify day-to-day activities. [1]</text>
 <text x="20" y="268" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"></text>
 <text x="20" y="286" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">How migration works (per Palo Alto documentation)</text>
-<text x="20" y="304" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Administrators import Prisma Cloud custom policies as custom Cortex Cloud Application Security rules. [2]</text>
-<text x="20" y="322" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- The Upgrade Helper converts Prisma Cloud Enforcement rules into Cortex Cloud Application Security</text>
-<text x="20" y="340" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  policies. [2]</text>
-<text x="20" y="358" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Administrators copy and apply out-of-the-box Prisma Cloud policy labels to Cortex Cloud Application</text>
-<text x="20" y="376" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  Security rules. [2]</text>
-<text x="20" y="394" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"></text>
-<text x="20" y="412" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">Mapping</text>
-<text x="20" y="430" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Prisma Cloud Permission Groups and Roles -&gt; Cortex Cloud Roles and User Groups [1]</text>
-<text x="20" y="448" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Prisma Cloud Policies -&gt; Cortex Cloud Rules [1]</text>
-<text x="20" y="466" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Prisma Cloud Rules and Their Collections -&gt; Cortex Cloud Policies and Their Asset Groups [1]</text>
-<text x="20" y="484" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Prisma Cloud Application Criteria -&gt; Cortex Cloud Application Criteria [1]</text>
-<text x="20" y="502" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"></text>
-<text x="20" y="520" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">Manual work</text>
-<text x="20" y="538" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Custom exception rules in Prisma Cloud are not carried over and must be reconfigured in Cortex Cloud. [2]</text>
-<text x="20" y="556" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Cortex Cloud applies strict AND logic for multiple tags, unlike Prisma Cloud's flexible matching. [2]</text>
-<text x="20" y="574" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- Manual applications or discovery criteria that include specific repositories are not migrated to Cortex</text>
-<text x="20" y="592" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  Cloud. [2]</text>
-<text x="20" y="610" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"></text>
-<text x="20" y="628" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">Sources</text>
-<text x="20" y="646" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- [1] https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/onboard-and-</text>
-<text x="20" y="664" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  configure/deployment-steps-and-checklist/upgrade-from-prisma-cloud-to-cortex-cloud/about-the-upgrade-</text>
-<text x="20" y="682" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  helper.md</text>
-<text x="20" y="700" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- [2] https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/onboard-and-</text>
-<text x="20" y="718" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  configure/deployment-steps-and-checklist/upgrade-from-prisma-cloud-to-cortex-cloud/copy-content/copy-</text>
-<text x="20" y="736" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  cortex-cloud-application-security-configurations.md</text>
+<text x="20" y="304" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- The Upgrade Helper provides a gradual and flexible upgrade experience from Prisma Cloud to Cortex Cloud.</text>
+<text x="20" y="322" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  [2]</text>
+<text x="20" y="340" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve"></text>
+<text x="20" y="358" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">Sources</text>
+<text x="20" y="376" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- [1] https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/get-started/what-is-cortex-</text>
+<text x="20" y="394" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  cloud.md</text>
+<text x="20" y="412" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">- [2] https://cortex-docs.paloaltonetworks.com/cortex-cloud-posture-management/onboard-and-</text>
+<text x="20" y="430" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  configure/deployment-steps-and-checklist/upgrade-from-prisma-cloud-to-cortex-cloud/about-the-upgrade-</text>
+<text x="20" y="448" fill="#24292f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" xml:space="preserve">  helper.md</text>
 </svg>

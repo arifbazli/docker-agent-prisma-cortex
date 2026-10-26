@@ -10,7 +10,7 @@ wrapped = []
 for l in body:
     wrapped += textwrap.wrap(l, 108, subsequent_indent="  ") or [""]
 body = wrapped
-rows = [("acc", "$ docker-agent run --exec 'agents/#1Prisma-Cortex-Product-Hub.yaml' \\"),
+rows = [("acc", "$ scripts/run.sh \\"),
         ("acc", "    \"Why migrate from Prisma Cloud to Cortex Cloud?\""),
         ("fg", "")]
 rows += [("acc" if l.startswith("# ") else "fg", l) for l in body]
