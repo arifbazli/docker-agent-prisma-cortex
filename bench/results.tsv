@@ -1,0 +1,26 @@
+date	commit	config	mode	research_model	judge_model	writer_model	id	seconds	result	verdicts	note
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	migrate-why	68	PASS	SUPPORTED=10	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	migrate-why	80	PASS	SUPPORTED=8	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	upgrade-helper	65	PASS	SUPPORTED=6	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	upgrade-helper	89	PASS	SUPPORTED=2	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	link-tenants	141	PASS	PARTLY_SUPPORTED=2 SUPPORTED=2	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	link-tenants	168	PASS	SUPPORTED=4	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	release-latest	169	PASS	UNSUPPORTED=1 SUPPORTED=1	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	release-latest	168	PASS	PARTLY_SUPPORTED=1 UNSUPPORTED=1 SUPPORTED=2	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	cspm-scope	97	FAIL	UNSUPPORTED=5	no briefing: NO FACTS FOUND: the official sources did
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	cspm-scope	91	PASS	UNSUPPORTED=1 SUPPORTED=1	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	ciem	173	PASS	SUPPORTED=4	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	ciem	173	PASS	SUPPORTED=4	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	ai-spm	114	PASS	SUPPORTED=7	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	ai-spm	111	PASS	UNSUPPORTED=5 SUPPORTED=1	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	appsec-rules	33	PASS	SUPPORTED=1	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	api-auth	33	PASS	SUPPORTED=4	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	prisma-api-login	55	PASS	SUPPORTED=1	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	appsec-rules	166	PASS	SUPPORTED=5	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	api-auth	17	PASS	SUPPORTED=2	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	prisma-api-login	2	PASS	-	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	xdr-itdr	2	PASS	-	
+2026-10-26	145400d	cortex-cloud-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	oos-france	2	PASS	-	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	xdr-itdr	103	PASS	SUPPORTED=1	
+2026-10-26	145400d	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	oos-france	1	PASS	-	
+2026-10-26	6b971ed	prisma-cortex-hub	pipeline	nemotron-3-super:cloud	gpt-oss:120b-cloud	nemotron-3-super:cloud	cspm-scope	66	PASS	UNSUPPORTED=1 SUPPORTED=1	

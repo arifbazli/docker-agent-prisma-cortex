@@ -159,6 +159,8 @@ examples/    earlier experiments, kept for reference
 
 ## Known limitations
 
+- Baseline (`bench/results.tsv`, default models): prisma-cortex-hub 11/12 then 12/12 after a fix, cortex-cloud-hub 12/12; 1-3 minutes per question.
+- Broad questions ("what does X cover") sometimes stop at the docs `?ask=` answer instead of opening the content pages it lists. Those facts are rejected (or re-cited when the quote is on a real fetched page), so such briefings can be thin.
 - LLMs vary between runs. If a run fails the checks, run it again before changing prompts; use the benchmark to compare changes.
 - The Upgrade Helper table is flattened from merged cells, so some rows are easy to misread. Check mapping rows against the page.
 - Briefings reflect vendor documentation, not independent testing, and are only as current as the pages at fetch time.
