@@ -5,7 +5,7 @@
 # Agents: root -> researcher -> verifier -> writer
 #
 # HOW TO RUN:
-#   docker-agent run --yolo --exec agents/20-pan-research.yaml "<question>"
+#   docker-agent run --yolo --exec examples/20-pan-research.yaml "<question>"
 #
 #   Safe here because reach is limited at two lower layers:
 #     - permissions.deny blocks write_* and exec_*

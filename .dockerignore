@@ -1,0 +1,11 @@
+.git
+.github
+.env
+outputs/
+logs/
+fetched/
+examples/
+docs/
+tests/
+**/__pycache__
+*.log

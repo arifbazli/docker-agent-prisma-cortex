@@ -4,6 +4,7 @@
 #   CFG=agents/cortex-cloud-hub.yaml   config (default agents/prisma-cortex-hub.yaml)
 #   MODE=agent                         run the self-contained root agent instead
 #                                      of the scripted pipeline
+#   OUT_DIR=outputs                    where briefings go
 #   SAFETY=restricted                  docker-agent --safety level (default
 #                                      restricted: fetch is allowed by the
 #                                      config, anything else is refused)
@@ -17,18 +18,15 @@ set -uo pipefail
 cd "$(dirname "$0")/.." || exit 64
 q="${1:?usage: $0 \"question\"}"
 
-if [ -f .env ]; then
-  set -a
-  # shellcheck disable=SC1091
-  . ./.env
-  set +a
-fi
+# shellcheck source=scripts/env.sh
+. scripts/env.sh
+load_env .env
 
 start=$(date +%s)
 python3 scripts/pipeline.py --config "${CFG:-agents/prisma-cortex-hub.yaml}" \
   --mode "${MODE:-pipeline}" -- "$q"
 rc=$?
-out=$(cat outputs/.last 2>/dev/null || true)
+out=$(cat "${OUT_DIR:-outputs}/.last" 2>/dev/null || true)
 
 echo
 echo "=== checks ==="

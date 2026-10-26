@@ -12,3 +12,4 @@ fetched/
 __pycache__/
 *.pyc
 *.bak*
+agents/*.local.yaml

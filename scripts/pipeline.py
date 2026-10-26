@@ -284,6 +284,7 @@ class Fact:
     verdict: str = ""
     note: str = ""
     match: str = ""
+    dropped: bool = False  # never shown to the writer (banned URL)
 
 
 def clean_url(url: str) -> str:
@@ -340,7 +341,7 @@ def check_quotes(facts: list[Fact], pages: list[Page]) -> None:
     for f in facts:
         reason = banned_url(f.url)
         if reason:
-            f.verdict, f.note = "UNSUPPORTED", reason
+            f.verdict, f.note, f.dropped = "UNSUPPORTED", reason, True
             continue
         page = by_url.get(url_key(f.url))
         if page is None:
@@ -393,7 +394,9 @@ def apply_judge(facts: list[Fact], text: str) -> int:
 
 
 def verdict_lines(facts: list[Fact]) -> list[str]:
-    return [f"{f.verdict} | {f.line} | NOTE: {f.note or 'none'}" for f in facts]
+    """Writer input. Facts citing a banned URL are left out entirely: the
+    writer would otherwise list a ?ask= URL under To confirm / Sources."""
+    return [f"{f.verdict} | {f.line} | NOTE: {f.note or 'none'}" for f in facts if not f.dropped]
 
 
 # --------------------------------------------------------------------------
@@ -537,6 +540,8 @@ def main() -> int:
     log("verdicts: " + ", ".join(f"{k}={v}" for k, v in counts.items()))
 
     # 4. writer
+    if not any(not f.dropped for f in facts):
+        return finish(NO_FACTS, 0)
     prompt = f"QUESTION: {question}\n\n" + "\n".join(verdict_lines(facts))
     wr = run_agent(args.config, "writer", prompt, logs / "writer.ndjson", args.timeout)
     stage(wr)
