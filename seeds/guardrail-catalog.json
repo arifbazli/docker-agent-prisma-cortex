@@ -1,0 +1,2161 @@
+{
+  "catalog_version": "1.0",
+  "$comment": "Curated data, not model output. Threat ids: OWASP Top 10 for LLM Applications 2025 and MITRE ATLAS (atlas-data v5.6.0). supported_targets lists where a control maps to a built-in feature: bedrock = Amazon Bedrock Guardrails, nemo = NVIDIA NeMo Guardrails; generic = implement in your own gateway or app. applies_when: match all with no conditions means always.",
+  "categories": [
+    {
+      "id": "input",
+      "name": "Input",
+      "prefix": "INPUT"
+    },
+    {
+      "id": "prompt",
+      "name": "Prompt",
+      "prefix": "PROMPT"
+    },
+    {
+      "id": "retrieval",
+      "name": "Retrieval",
+      "prefix": "RETRIEVAL"
+    },
+    {
+      "id": "tool",
+      "name": "Tool",
+      "prefix": "TOOL"
+    },
+    {
+      "id": "output",
+      "name": "Output",
+      "prefix": "OUTPUT"
+    },
+    {
+      "id": "runtime",
+      "name": "Runtime",
+      "prefix": "RUNTIME"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "prefix": "MEMORY"
+    }
+  ],
+  "threats": [
+    {
+      "id": "LLM01:2025",
+      "name": "Prompt Injection",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+    },
+    {
+      "id": "LLM02:2025",
+      "name": "Sensitive Information Disclosure",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
+    },
+    {
+      "id": "LLM03:2025",
+      "name": "Supply Chain",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
+    },
+    {
+      "id": "LLM04:2025",
+      "name": "Data and Model Poisoning",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/"
+    },
+    {
+      "id": "LLM05:2025",
+      "name": "Improper Output Handling",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/"
+    },
+    {
+      "id": "LLM06:2025",
+      "name": "Excessive Agency",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+    },
+    {
+      "id": "LLM07:2025",
+      "name": "System Prompt Leakage",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/"
+    },
+    {
+      "id": "LLM08:2025",
+      "name": "Vector and Embedding Weaknesses",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/"
+    },
+    {
+      "id": "LLM09:2025",
+      "name": "Misinformation",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm092025-misinformation/"
+    },
+    {
+      "id": "LLM10:2025",
+      "name": "Unbounded Consumption",
+      "framework": "OWASP LLM Top 10 2025",
+      "url": "https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/"
+    },
+    {
+      "id": "AML.T0011.000",
+      "name": "User Execution: Unsafe AI Artifacts",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0011.001",
+      "name": "User Execution: Malicious Package",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0024",
+      "name": "Exfiltration via AI Inference API",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0029",
+      "name": "Denial of AI Service",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0034",
+      "name": "Cost Harvesting",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0043",
+      "name": "Craft Adversarial Data",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0048",
+      "name": "External Harms",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0048.000",
+      "name": "External Harms: Financial Harm",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0048.001",
+      "name": "External Harms: Reputational Harm",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0048.003",
+      "name": "External Harms: User Harm",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0050",
+      "name": "Command and Scripting Interpreter",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0051",
+      "name": "LLM Prompt Injection",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0051.000",
+      "name": "LLM Prompt Injection: Direct",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0051.001",
+      "name": "LLM Prompt Injection: Indirect",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0053",
+      "name": "AI Agent Tool Invocation",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0054",
+      "name": "LLM Jailbreak",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0056",
+      "name": "Extract LLM System Prompt",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0057",
+      "name": "LLM Data Leakage",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0062",
+      "name": "Discover LLM Hallucinations",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0067",
+      "name": "LLM Trusted Output Components Manipulation",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0070",
+      "name": "RAG Poisoning",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0071",
+      "name": "False RAG Entry Injection",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0077",
+      "name": "LLM Response Rendering",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0080",
+      "name": "AI Agent Context Poisoning",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0080.000",
+      "name": "AI Agent Context Poisoning: Memory",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0080.001",
+      "name": "AI Agent Context Poisoning: Thread",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0083",
+      "name": "Credentials from AI Agent Configuration",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0084",
+      "name": "Discover AI Agent Configuration",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0085.000",
+      "name": "Data from AI Services: RAG Databases",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0086",
+      "name": "Exfiltration via AI Agent Tool Invocation",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0092",
+      "name": "Manipulate User LLM Chat History",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    },
+    {
+      "id": "AML.T0098",
+      "name": "AI Agent Tool Credential Harvesting",
+      "framework": "MITRE ATLAS",
+      "url": "https://atlas.mitre.org/"
+    }
+  ],
+  "controls": [
+    {
+      "id": "INPUT-01",
+      "category": "input",
+      "name": "Input validation",
+      "description": "Reject requests that fail basic type, encoding and structure checks before they reach the model.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0043"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "INPUT-02",
+      "category": "input",
+      "name": "File scanning",
+      "description": "Scan uploaded or ingested files before parsing; block files that cannot be scanned.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "tool_list",
+            "op": "contains_any",
+            "value": [
+              "file_upload",
+              "documents",
+              "ocr"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM04:2025",
+        "AML.T0011.000"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "INPUT-03",
+      "category": "input",
+      "name": "Schema checks",
+      "description": "Validate structured inputs (forms, JSON, tool arguments) against an explicit schema.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "autonomy_level",
+            "op": "ne",
+            "value": "none"
+          }
+        ]
+      },
+      "threats": [
+        "LLM05:2025",
+        "AML.T0043"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "INPUT-04",
+      "category": "input",
+      "name": "Content sanitization",
+      "description": "Strip or neutralise markup, control characters and hidden text from user and document input.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0051.001"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "INPUT-05",
+      "category": "input",
+      "name": "MIME validation",
+      "description": "Allow only expected MIME types and check that the content matches the declared type.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "tool_list",
+            "op": "contains_any",
+            "value": [
+              "file_upload",
+              "documents",
+              "ocr"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM04:2025",
+        "AML.T0011.000"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "INPUT-06",
+      "category": "input",
+      "name": "Malware screening",
+      "description": "Run anti-malware on files and attachments before any processing.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "tool_list",
+            "op": "contains_any",
+            "value": [
+              "file_upload",
+              "documents",
+              "email"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM03:2025",
+        "AML.T0011.001"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "INPUT-07",
+      "category": "input",
+      "name": "Size limits",
+      "description": "Cap request, attachment and prompt size to bound cost and denial of service.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0029"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "INPUT-08",
+      "category": "input",
+      "name": "Rate limits",
+      "description": "Limit requests per user, key and IP over time.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0029",
+        "AML.T0034"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "INPUT-09",
+      "category": "input",
+      "name": "Language checks",
+      "description": "Detect the input language and route or refuse languages the guardrails are not tuned for.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0054"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "low"
+    },
+    {
+      "id": "INPUT-10",
+      "category": "input",
+      "name": "Injection screening",
+      "description": "Classify user and document input for direct and indirect prompt injection.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0051.000",
+        "AML.T0051.001"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "PROMPT-01",
+      "category": "prompt",
+      "name": "System prompt isolation",
+      "description": "Keep system instructions in a separate channel from user and retrieved content.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM07:2025",
+        "LLM01:2025",
+        "AML.T0056"
+      ],
+      "enforcement_point": "prompt_assembly",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "PROMPT-02",
+      "category": "prompt",
+      "name": "Prompt firewall",
+      "description": "Inspect the fully assembled prompt and block known attack patterns before inference.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0051"
+      ],
+      "enforcement_point": "prompt_assembly",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "PROMPT-03",
+      "category": "prompt",
+      "name": "Role separation",
+      "description": "Tag every prompt segment with its role (system, user, document, tool) and never merge them.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0051.001"
+      ],
+      "enforcement_point": "prompt_assembly",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "PROMPT-04",
+      "category": "prompt",
+      "name": "Content boundaries",
+      "description": "Wrap untrusted content in explicit delimiters and instruct the model to treat it as data.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0051.001"
+      ],
+      "enforcement_point": "prompt_assembly",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "PROMPT-05",
+      "category": "prompt",
+      "name": "Prompt templates",
+      "description": "Build prompts only from versioned, reviewed templates.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM01:2025",
+        "LLM07:2025"
+      ],
+      "enforcement_point": "prompt_assembly",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "PROMPT-06",
+      "category": "prompt",
+      "name": "Instruction locking",
+      "description": "Prevent user or retrieved content from overriding system instructions.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0054"
+      ],
+      "enforcement_point": "prompt_assembly",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "PROMPT-07",
+      "category": "prompt",
+      "name": "Jailbreak detection",
+      "description": "Detect jailbreak attempts such as role-play and obfuscation in user input.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0054"
+      ],
+      "enforcement_point": "pre_model",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "PROMPT-08",
+      "category": "prompt",
+      "name": "Prompt rewriting",
+      "description": "Normalise or paraphrase risky user input before it is placed in the prompt.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0051.000"
+      ],
+      "enforcement_point": "prompt_assembly",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "low"
+    },
+    {
+      "id": "PROMPT-09",
+      "category": "prompt",
+      "name": "Policy injection checks",
+      "description": "Detect content that tries to change policies, roles or tools from inside data.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0051.001",
+        "AML.T0080"
+      ],
+      "enforcement_point": "prompt_assembly",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "PROMPT-10",
+      "category": "prompt",
+      "name": "Hidden prompt protection",
+      "description": "Block output that reveals system prompts or hidden configuration.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM07:2025",
+        "AML.T0056",
+        "AML.T0084"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "RETRIEVAL-01",
+      "category": "retrieval",
+      "name": "Source filtering",
+      "description": "Retrieve only from approved collections and indexes.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM08:2025",
+        "AML.T0070"
+      ],
+      "enforcement_point": "retrieval_pipeline",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "RETRIEVAL-02",
+      "category": "retrieval",
+      "name": "Freshness checks",
+      "description": "Prefer or require documents newer than a set age; flag stale sources.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM09:2025"
+      ],
+      "enforcement_point": "retrieval_pipeline",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "low"
+    },
+    {
+      "id": "RETRIEVAL-03",
+      "category": "retrieval",
+      "name": "Trust scoring",
+      "description": "Score sources by provenance and drop low-trust chunks.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM04:2025",
+        "LLM08:2025",
+        "AML.T0070"
+      ],
+      "enforcement_point": "retrieval_pipeline",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "RETRIEVAL-04",
+      "category": "retrieval",
+      "name": "Chunk validation",
+      "description": "Check retrieved chunks for injection, PII and policy violations before use.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM01:2025",
+        "LLM08:2025",
+        "AML.T0071"
+      ],
+      "enforcement_point": "retrieval_pipeline",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "RETRIEVAL-05",
+      "category": "retrieval",
+      "name": "Metadata filtering",
+      "description": "Filter retrieval by tenant, permission and classification metadata.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM02:2025",
+        "LLM08:2025",
+        "AML.T0085.000"
+      ],
+      "enforcement_point": "retrieval_pipeline",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "RETRIEVAL-06",
+      "category": "retrieval",
+      "name": "Duplicate removal",
+      "description": "De-duplicate near-identical chunks to reduce poisoning amplification and token waste.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM08:2025",
+        "LLM10:2025"
+      ],
+      "enforcement_point": "retrieval_pipeline",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "low"
+    },
+    {
+      "id": "RETRIEVAL-07",
+      "category": "retrieval",
+      "name": "Re-ranking",
+      "description": "Re-rank retrieved chunks for relevance before they enter the prompt.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM09:2025"
+      ],
+      "enforcement_point": "retrieval_pipeline",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "low"
+    },
+    {
+      "id": "RETRIEVAL-08",
+      "category": "retrieval",
+      "name": "Grounding rules",
+      "description": "Require answers to be supported by retrieved context; refuse when context is missing.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM09:2025",
+        "AML.T0062"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "RETRIEVAL-09",
+      "category": "retrieval",
+      "name": "Document allowlists",
+      "description": "Allow only listed documents or domains to be ingested into the index.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM04:2025",
+        "AML.T0070"
+      ],
+      "enforcement_point": "retrieval_pipeline",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "RETRIEVAL-10",
+      "category": "retrieval",
+      "name": "Citation enforcement",
+      "description": "Require every factual claim in an answer to cite a retrieved source.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM09:2025"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "TOOL-01",
+      "category": "tool",
+      "name": "Tool allowlists",
+      "description": "Expose only explicitly approved tools to the model.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM06:2025",
+        "AML.T0053"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "critical"
+    },
+    {
+      "id": "TOOL-02",
+      "category": "tool",
+      "name": "Action approval",
+      "description": "Require policy approval for state-changing tool actions.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "autonomy_level",
+            "op": "in",
+            "value": [
+              "act_with_approval",
+              "autonomous"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM06:2025",
+        "AML.T0053"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "TOOL-03",
+      "category": "tool",
+      "name": "Permission checks",
+      "description": "Check the end user's permissions for every tool call, not the agent's.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM06:2025",
+        "LLM02:2025",
+        "AML.T0053"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "critical"
+    },
+    {
+      "id": "TOOL-04",
+      "category": "tool",
+      "name": "API scope control",
+      "description": "Give tools least-privilege, short-lived credentials scoped per call.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM06:2025",
+        "AML.T0098",
+        "AML.T0083"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "TOOL-05",
+      "category": "tool",
+      "name": "Transaction limits",
+      "description": "Cap amounts, counts and frequency of financial or bulk actions.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "tool_list",
+            "op": "contains_any",
+            "value": [
+              "payments",
+              "transfer",
+              "refund",
+              "purchase",
+              "billing",
+              "trade"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM06:2025",
+        "AML.T0048.000"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "critical"
+    },
+    {
+      "id": "TOOL-06",
+      "category": "tool",
+      "name": "Tool sandboxing",
+      "description": "Run code-executing or file-touching tools in an isolated sandbox.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "tool_list",
+            "op": "contains_any",
+            "value": [
+              "code_exec",
+              "shell",
+              "python",
+              "browser",
+              "file_write"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM06:2025",
+        "LLM05:2025",
+        "AML.T0050"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "critical"
+    },
+    {
+      "id": "TOOL-07",
+      "category": "tool",
+      "name": "Execution logging",
+      "description": "Log every tool call with inputs, outputs, caller and decision.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM06:2025",
+        "AML.T0086"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "TOOL-08",
+      "category": "tool",
+      "name": "Timeout controls",
+      "description": "Set per-call and per-task timeouts for tools.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0029"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "TOOL-09",
+      "category": "tool",
+      "name": "Retry limits",
+      "description": "Bound retries for failed tool calls to prevent loops and cost spikes.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0034"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "low"
+    },
+    {
+      "id": "TOOL-10",
+      "category": "tool",
+      "name": "Human confirmation",
+      "description": "Ask a human to confirm high-impact or irreversible actions before execution.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "autonomy_level",
+            "op": "in",
+            "value": [
+              "act_with_approval",
+              "autonomous"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM06:2025",
+        "AML.T0048"
+      ],
+      "enforcement_point": "tool_gateway",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "critical"
+    },
+    {
+      "id": "OUTPUT-01",
+      "category": "output",
+      "name": "Content moderation",
+      "description": "Classify model output for harmful content categories before returning it.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM05:2025",
+        "AML.T0048.003"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "OUTPUT-02",
+      "category": "output",
+      "name": "Toxicity checks",
+      "description": "Block or rewrite toxic, hateful or harassing output.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM05:2025",
+        "AML.T0048.001"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "OUTPUT-03",
+      "category": "output",
+      "name": "PII masking",
+      "description": "Detect and mask personal data in model output.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "handles_pii",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "regulatory_context",
+            "op": "contains_any",
+            "value": [
+              "gdpr",
+              "hipaa",
+              "pci_dss",
+              "sox",
+              "eu_ai_act",
+              "pdpa"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM02:2025",
+        "AML.T0057"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "OUTPUT-04",
+      "category": "output",
+      "name": "Policy filters",
+      "description": "Apply organisation word and phrase deny-lists to output.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM05:2025"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "OUTPUT-05",
+      "category": "output",
+      "name": "Hallucination checks",
+      "description": "Check output claims against provided context or known facts.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM09:2025",
+        "AML.T0062"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "OUTPUT-06",
+      "category": "output",
+      "name": "Citation checks",
+      "description": "Verify that cited sources exist and support the cited claim.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "uses_rag",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM09:2025"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "OUTPUT-07",
+      "category": "output",
+      "name": "Safety disclaimers",
+      "description": "Add required disclaimers to regulated or advisory answers.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "regulatory_context",
+            "op": "contains_any",
+            "value": [
+              "gdpr",
+              "hipaa",
+              "pci_dss",
+              "sox",
+              "eu_ai_act",
+              "pdpa"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM09:2025"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "low"
+    },
+    {
+      "id": "OUTPUT-08",
+      "category": "output",
+      "name": "Restricted topics blocking",
+      "description": "Refuse topics the application must not discuss.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM05:2025",
+        "AML.T0048.001"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic",
+        "bedrock",
+        "nemo"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "OUTPUT-09",
+      "category": "output",
+      "name": "Format enforcement",
+      "description": "Validate output format (JSON, length, schema) before downstream use.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "autonomy_level",
+            "op": "ne",
+            "value": "none"
+          }
+        ]
+      },
+      "threats": [
+        "LLM05:2025",
+        "AML.T0067"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "OUTPUT-10",
+      "category": "output",
+      "name": "Response validation",
+      "description": "Sanitise output before rendering or passing it to other systems (HTML, SQL, links).",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM05:2025",
+        "AML.T0077"
+      ],
+      "enforcement_point": "post_model",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "RUNTIME-01",
+      "category": "runtime",
+      "name": "Session monitoring",
+      "description": "Track per-session behaviour and guardrail hits.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0054"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "RUNTIME-02",
+      "category": "runtime",
+      "name": "Anomaly detection",
+      "description": "Alert on unusual request patterns, tool usage or guardrail block rates.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0029",
+        "AML.T0024"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "RUNTIME-03",
+      "category": "runtime",
+      "name": "Latency tracking",
+      "description": "Measure end-to-end and per-guardrail latency against an SLO.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM10:2025"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "low"
+    },
+    {
+      "id": "RUNTIME-04",
+      "category": "runtime",
+      "name": "Token limits",
+      "description": "Cap input and output tokens per request and per session.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0034"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "RUNTIME-05",
+      "category": "runtime",
+      "name": "Cost controls",
+      "description": "Budget and alert on model and tool spend per user and per day.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0034"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "RUNTIME-06",
+      "category": "runtime",
+      "name": "Loop detection",
+      "description": "Stop agents that repeat the same action or exceed a step budget.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM06:2025",
+        "LLM10:2025",
+        "AML.T0029"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "RUNTIME-07",
+      "category": "runtime",
+      "name": "Failure handling",
+      "description": "Fail closed when a guardrail or model call errors.",
+      "applies_when": {
+        "match": "all",
+        "conditions": []
+      },
+      "threats": [
+        "LLM05:2025",
+        "LLM10:2025"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "RUNTIME-08",
+      "category": "runtime",
+      "name": "Fallback routing",
+      "description": "Route to a safe fallback (canned answer, human) when checks fail.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "autonomy_level",
+            "op": "in",
+            "value": [
+              "act_with_approval",
+              "autonomous"
+            ]
+          }
+        ]
+      },
+      "threats": [
+        "LLM09:2025",
+        "LLM10:2025"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic",
+        "nemo"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "RUNTIME-09",
+      "category": "runtime",
+      "name": "Concurrency control",
+      "description": "Limit parallel requests and agent runs per user and globally.",
+      "applies_when": {
+        "match": "any",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "has_tools",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0029"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "RUNTIME-10",
+      "category": "runtime",
+      "name": "Abuse monitoring",
+      "description": "Detect and act on repeated policy violations by a user or key.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "user_facing",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM10:2025",
+        "AML.T0054",
+        "AML.T0034"
+      ],
+      "enforcement_point": "runtime_monitor",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "MEMORY-01",
+      "category": "memory",
+      "name": "Memory retention",
+      "description": "Define what may be stored in memory and for how long.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM02:2025",
+        "AML.T0080.000"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "MEMORY-02",
+      "category": "memory",
+      "name": "Memory expiry",
+      "description": "Expire memory entries automatically after the retention period.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM02:2025",
+        "AML.T0080.000"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "MEMORY-03",
+      "category": "memory",
+      "name": "Recall filtering",
+      "description": "Filter recalled memories for injection and relevance before use.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM01:2025",
+        "AML.T0080.000"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "MEMORY-04",
+      "category": "memory",
+      "name": "Sensitive data blocking",
+      "description": "Do not write PII, secrets or classified data to memory.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM02:2025",
+        "AML.T0057"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "MEMORY-05",
+      "category": "memory",
+      "name": "User separation",
+      "description": "Isolate memory per user and tenant.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM02:2025",
+        "AML.T0080.000",
+        "AML.T0092"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "critical"
+    },
+    {
+      "id": "MEMORY-06",
+      "category": "memory",
+      "name": "Session boundaries",
+      "description": "Scope short-term memory to a session and clear it at session end.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM02:2025",
+        "AML.T0080.001"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "MEMORY-07",
+      "category": "memory",
+      "name": "Write controls",
+      "description": "Allow only validated, policy-checked content to be written to memory.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM04:2025",
+        "AML.T0080.000"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "high"
+    },
+    {
+      "id": "MEMORY-08",
+      "category": "memory",
+      "name": "Edit controls",
+      "description": "Restrict who and what may modify stored memories.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM04:2025",
+        "AML.T0080.000"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "MEMORY-09",
+      "category": "memory",
+      "name": "Deletion rules",
+      "description": "Support user and regulatory deletion requests for stored memory.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM02:2025"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    },
+    {
+      "id": "MEMORY-10",
+      "category": "memory",
+      "name": "Audit history",
+      "description": "Keep an audit log of memory writes, edits, recalls and deletions.",
+      "applies_when": {
+        "match": "all",
+        "conditions": [
+          {
+            "field": "has_memory",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "threats": [
+        "LLM02:2025",
+        "AML.T0080"
+      ],
+      "enforcement_point": "memory_store",
+      "supported_targets": [
+        "generic"
+      ],
+      "default_severity": "medium"
+    }
+  ]
+}

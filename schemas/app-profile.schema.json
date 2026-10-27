@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "app-profile.schema.json",
+  "title": "Sanitized AI application profile (input to the guardrail policy generator)",
+  "description": "Describe the application's shape only. Never put secrets, customer data or tenant identifiers in a profile: it is sent to the model provider.",
+  "type": "object",
+  "required": ["uses_rag", "has_tools", "tool_list", "has_memory", "handles_pii", "user_facing", "autonomy_level", "cloud", "data_classification", "regulatory_context"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {"type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9 ._-]{1,60}$", "description": "Optional short label, e.g. 'support-chatbot'."},
+    "uses_rag": {"type": "boolean", "description": "Retrieves documents into the prompt."},
+    "has_tools": {"type": "boolean", "description": "The model can call tools or APIs."},
+    "tool_list": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9_.-]{1,40}$"}, "description": "Generic tool names, e.g. search, send_email, payments."},
+    "has_memory": {"type": "boolean", "description": "Keeps memory across turns or sessions."},
+    "handles_pii": {"type": "boolean"},
+    "user_facing": {"type": "boolean", "description": "End users interact with it directly."},
+    "autonomy_level": {"type": "string", "enum": ["none", "suggest", "act_with_approval", "autonomous"]},
+    "cloud": {"type": "string", "enum": ["aws", "azure", "gcp", "multi_cloud", "on_prem"]},
+    "data_classification": {"type": "string", "enum": ["public", "internal", "confidential", "restricted"]},
+    "regulatory_context": {"type": "array", "uniqueItems": true, "items": {"type": "string", "enum": ["none", "gdpr", "hipaa", "pci_dss", "sox", "eu_ai_act", "pdpa", "iso_42001", "nist_ai_rmf"]}}
+  }
+}
