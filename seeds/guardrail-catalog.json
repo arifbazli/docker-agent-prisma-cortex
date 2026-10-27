@@ -1,6 +1,6 @@
 {
   "catalog_version": "1.0",
-  "$comment": "Curated data, not model output. Threat ids: OWASP Top 10 for LLM Applications 2025 and MITRE ATLAS (atlas-data v5.6.0). supported_targets lists where a control maps to a built-in feature: bedrock = Amazon Bedrock Guardrails, nemo = NVIDIA NeMo Guardrails; generic = implement in your own gateway or app. applies_when: match all with no conditions means always.",
+  "$comment": "Curated data, not model output. Threat ids: OWASP Top 10 for LLM Applications 2025 and MITRE ATLAS (atlas-data v5.6.0). supported_targets lists where a control maps to a built-in feature: bedrock = Amazon Bedrock Guardrails, nemo = NVIDIA NeMo Guardrails; generic = implement in your own gateway or app. applies_when: match all with no conditions means always. allowed_parameter_keys: the only parameter names a specialist may propose for a control.",
   "categories": [
     {
       "id": "input",
@@ -311,7 +311,12 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "max_input_chars",
+        "allowed_encodings",
+        "reject_on_invalid"
+      ]
     },
     {
       "id": "INPUT-02",
@@ -345,7 +350,12 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "allowed_file_types",
+        "scan_before_parse",
+        "max_file_size_mb"
+      ]
     },
     {
       "id": "INPUT-03",
@@ -375,7 +385,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "schema_validation",
+        "reject_on_invalid"
+      ]
     },
     {
       "id": "INPUT-04",
@@ -395,7 +409,12 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "strip_markup",
+        "strip_control_characters",
+        "input_tagging"
+      ]
     },
     {
       "id": "INPUT-05",
@@ -429,7 +448,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "allowed_mime_types",
+        "verify_content_type"
+      ]
     },
     {
       "id": "INPUT-06",
@@ -463,7 +486,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "malware_scan",
+        "block_unscannable"
+      ]
     },
     {
       "id": "INPUT-07",
@@ -483,7 +510,12 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "max_input_chars",
+        "max_input_tokens",
+        "max_file_size_mb"
+      ]
     },
     {
       "id": "INPUT-08",
@@ -514,7 +546,12 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "requests_per_minute",
+        "requests_per_day",
+        "rate_limit_scope"
+      ]
     },
     {
       "id": "INPUT-09",
@@ -540,7 +577,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "low"
+      "default_severity": "low",
+      "allowed_parameter_keys": [
+        "allowed_languages",
+        "unsupported_language_action"
+      ]
     },
     {
       "id": "INPUT-10",
@@ -562,7 +603,15 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "prompt_attack_strength",
+        "injection_detection_types",
+        "injection_action",
+        "self_check_input",
+        "content_safety_input",
+        "input_tagging"
+      ]
     },
     {
       "id": "PROMPT-01",
@@ -583,7 +632,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "input_tagging",
+        "separate_system_channel"
+      ]
     },
     {
       "id": "PROMPT-02",
@@ -620,7 +673,12 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "prompt_attack_strength",
+        "self_check_input",
+        "injection_detection_types"
+      ]
     },
     {
       "id": "PROMPT-03",
@@ -640,7 +698,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "input_tagging",
+        "role_labels"
+      ]
     },
     {
       "id": "PROMPT-04",
@@ -675,7 +737,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "input_tagging",
+        "untrusted_content_delimiters"
+      ]
     },
     {
       "id": "PROMPT-05",
@@ -695,7 +761,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "template_versioning",
+        "template_review_required"
+      ]
     },
     {
       "id": "PROMPT-06",
@@ -726,7 +796,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "prompt_attack_strength",
+        "input_tagging"
+      ]
     },
     {
       "id": "PROMPT-07",
@@ -753,7 +827,13 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "prompt_attack_strength",
+        "jailbreak_heuristics",
+        "length_per_perplexity_threshold",
+        "prefix_suffix_perplexity_threshold"
+      ]
     },
     {
       "id": "PROMPT-08",
@@ -779,7 +859,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "low"
+      "default_severity": "low",
+      "allowed_parameter_keys": [
+        "rewrite_action",
+        "self_check_input"
+      ]
     },
     {
       "id": "PROMPT-09",
@@ -816,7 +900,12 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "injection_detection_types",
+        "injection_action",
+        "prompt_attack_strength"
+      ]
     },
     {
       "id": "PROMPT-10",
@@ -848,7 +937,12 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "prompt_attack_strength",
+        "self_check_output",
+        "blocked_words"
+      ]
     },
     {
       "id": "RETRIEVAL-01",
@@ -874,7 +968,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "allowed_sources",
+        "metadata_filters"
+      ]
     },
     {
       "id": "RETRIEVAL-02",
@@ -898,7 +996,10 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "low"
+      "default_severity": "low",
+      "allowed_parameter_keys": [
+        "max_document_age_days"
+      ]
     },
     {
       "id": "RETRIEVAL-03",
@@ -924,7 +1025,10 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "min_trust_score"
+      ]
     },
     {
       "id": "RETRIEVAL-04",
@@ -951,7 +1055,12 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "mask_sensitive_data_on_retrieval",
+        "pii_entities",
+        "injection_detection_types"
+      ]
     },
     {
       "id": "RETRIEVAL-05",
@@ -977,7 +1086,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "metadata_filters",
+        "enforce_user_permissions"
+      ]
     },
     {
       "id": "RETRIEVAL-06",
@@ -1002,7 +1115,10 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "low"
+      "default_severity": "low",
+      "allowed_parameter_keys": [
+        "dedup_similarity_threshold"
+      ]
     },
     {
       "id": "RETRIEVAL-07",
@@ -1026,7 +1142,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "low"
+      "default_severity": "low",
+      "allowed_parameter_keys": [
+        "rerank_top_k",
+        "rerank_min_score"
+      ]
     },
     {
       "id": "RETRIEVAL-08",
@@ -1053,7 +1173,13 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "grounding_threshold",
+        "relevance_threshold",
+        "fact_checking",
+        "refuse_without_context"
+      ]
     },
     {
       "id": "RETRIEVAL-09",
@@ -1078,7 +1204,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "allowed_sources",
+        "allowed_domains"
+      ]
     },
     {
       "id": "RETRIEVAL-10",
@@ -1103,7 +1233,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "require_citations",
+        "min_citations"
+      ]
     },
     {
       "id": "TOOL-01",
@@ -1129,7 +1263,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "critical"
+      "default_severity": "critical",
+      "allowed_parameter_keys": [
+        "allowed_tools",
+        "deny_unlisted_tools"
+      ]
     },
     {
       "id": "TOOL-02",
@@ -1162,7 +1300,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "approval_required_actions",
+        "approval_policy"
+      ]
     },
     {
       "id": "TOOL-03",
@@ -1188,7 +1330,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "critical"
+      "default_severity": "critical",
+      "allowed_parameter_keys": [
+        "enforce_user_permissions",
+        "permission_source"
+      ]
     },
     {
       "id": "TOOL-04",
@@ -1214,7 +1360,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "credential_ttl_minutes",
+        "least_privilege_scopes"
+      ]
     },
     {
       "id": "TOOL-05",
@@ -1251,7 +1401,12 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "critical"
+      "default_severity": "critical",
+      "allowed_parameter_keys": [
+        "max_transaction_amount",
+        "max_transactions_per_day",
+        "currency"
+      ]
     },
     {
       "id": "TOOL-06",
@@ -1288,7 +1443,12 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "critical"
+      "default_severity": "critical",
+      "allowed_parameter_keys": [
+        "sandbox_type",
+        "network_egress",
+        "filesystem_access"
+      ]
     },
     {
       "id": "TOOL-07",
@@ -1314,7 +1474,12 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "log_tool_inputs",
+        "log_tool_outputs",
+        "log_retention_days"
+      ]
     },
     {
       "id": "TOOL-08",
@@ -1339,7 +1504,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "tool_timeout_seconds",
+        "task_timeout_seconds"
+      ]
     },
     {
       "id": "TOOL-09",
@@ -1364,7 +1533,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "low"
+      "default_severity": "low",
+      "allowed_parameter_keys": [
+        "max_retries",
+        "backoff_seconds"
+      ]
     },
     {
       "id": "TOOL-10",
@@ -1397,7 +1570,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "critical"
+      "default_severity": "critical",
+      "allowed_parameter_keys": [
+        "confirmation_required_actions",
+        "confirmation_timeout_minutes"
+      ]
     },
     {
       "id": "OUTPUT-01",
@@ -1424,7 +1601,13 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "content_filter_strength",
+        "content_filter_categories",
+        "content_safety_output",
+        "self_check_output"
+      ]
     },
     {
       "id": "OUTPUT-02",
@@ -1451,7 +1634,13 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "content_filter_strength",
+        "content_filter_categories",
+        "profanity_filter",
+        "content_safety_output"
+      ]
     },
     {
       "id": "OUTPUT-03",
@@ -1488,7 +1677,14 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "pii_entities",
+        "pii_action",
+        "pii_score_threshold",
+        "mask_sensitive_data_on_input",
+        "mask_sensitive_data_on_output"
+      ]
     },
     {
       "id": "OUTPUT-04",
@@ -1508,7 +1704,11 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "blocked_words",
+        "profanity_filter"
+      ]
     },
     {
       "id": "OUTPUT-05",
@@ -1529,7 +1729,13 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "grounding_threshold",
+        "relevance_threshold",
+        "hallucination_check",
+        "fact_checking"
+      ]
     },
     {
       "id": "OUTPUT-06",
@@ -1553,7 +1759,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "require_citations",
+        "verify_citation_support"
+      ]
     },
     {
       "id": "OUTPUT-07",
@@ -1590,7 +1800,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "low"
+      "default_severity": "low",
+      "allowed_parameter_keys": [
+        "disclaimer_text",
+        "disclaimer_topics"
+      ]
     },
     {
       "id": "OUTPUT-08",
@@ -1617,7 +1831,11 @@
         "bedrock",
         "nemo"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "denied_topics",
+        "topic_action"
+      ]
     },
     {
       "id": "OUTPUT-09",
@@ -1647,7 +1865,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "output_schema_validation",
+        "max_output_tokens"
+      ]
     },
     {
       "id": "OUTPUT-10",
@@ -1666,7 +1888,12 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "escape_html",
+        "block_external_links",
+        "self_check_output"
+      ]
     },
     {
       "id": "RUNTIME-01",
@@ -1691,7 +1918,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "log_guardrail_events",
+        "session_alert_threshold"
+      ]
     },
     {
       "id": "RUNTIME-02",
@@ -1711,7 +1942,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "block_rate_alert_threshold",
+        "anomaly_window_minutes"
+      ]
     },
     {
       "id": "RUNTIME-03",
@@ -1729,7 +1964,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "low"
+      "default_severity": "low",
+      "allowed_parameter_keys": [
+        "latency_slo_ms",
+        "guardrail_latency_budget_ms"
+      ]
     },
     {
       "id": "RUNTIME-04",
@@ -1749,7 +1988,12 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "max_input_tokens",
+        "max_output_tokens",
+        "max_session_tokens"
+      ]
     },
     {
       "id": "RUNTIME-05",
@@ -1768,7 +2012,12 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "daily_budget_usd",
+        "per_user_budget_usd",
+        "budget_alert_percent"
+      ]
     },
     {
       "id": "RUNTIME-06",
@@ -1794,7 +2043,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "max_agent_steps",
+        "max_repeated_actions"
+      ]
     },
     {
       "id": "RUNTIME-07",
@@ -1813,7 +2066,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "fail_closed",
+        "guardrail_error_action"
+      ]
     },
     {
       "id": "RUNTIME-08",
@@ -1847,7 +2104,11 @@
         "generic",
         "nemo"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "fallback_response",
+        "fallback_to_human"
+      ]
     },
     {
       "id": "RUNTIME-09",
@@ -1877,7 +2138,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "max_concurrent_requests_per_user",
+        "max_concurrent_agent_runs"
+      ]
     },
     {
       "id": "RUNTIME-10",
@@ -1903,7 +2168,12 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "violation_threshold",
+        "violation_window_minutes",
+        "abuse_action"
+      ]
     },
     {
       "id": "MEMORY-01",
@@ -1928,7 +2198,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "retention_days",
+        "allowed_memory_types"
+      ]
     },
     {
       "id": "MEMORY-02",
@@ -1953,7 +2227,10 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "memory_ttl_days"
+      ]
     },
     {
       "id": "MEMORY-03",
@@ -1978,7 +2255,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "injection_detection_types",
+        "recall_min_relevance"
+      ]
     },
     {
       "id": "MEMORY-04",
@@ -2003,7 +2284,12 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "pii_entities",
+        "pii_action",
+        "block_secrets"
+      ]
     },
     {
       "id": "MEMORY-05",
@@ -2029,7 +2315,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "critical"
+      "default_severity": "critical",
+      "allowed_parameter_keys": [
+        "memory_scope",
+        "tenant_isolation"
+      ]
     },
     {
       "id": "MEMORY-06",
@@ -2054,7 +2344,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "clear_on_session_end",
+        "session_ttl_minutes"
+      ]
     },
     {
       "id": "MEMORY-07",
@@ -2079,7 +2373,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "high"
+      "default_severity": "high",
+      "allowed_parameter_keys": [
+        "validate_before_write",
+        "write_allowed_sources"
+      ]
     },
     {
       "id": "MEMORY-08",
@@ -2104,7 +2402,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "edit_allowed_roles",
+        "edit_audit"
+      ]
     },
     {
       "id": "MEMORY-09",
@@ -2128,7 +2430,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "deletion_sla_days",
+        "user_deletion_requests"
+      ]
     },
     {
       "id": "MEMORY-10",
@@ -2153,7 +2459,11 @@
       "supported_targets": [
         "generic"
       ],
-      "default_severity": "medium"
+      "default_severity": "medium",
+      "allowed_parameter_keys": [
+        "audit_events",
+        "audit_retention_days"
+      ]
     }
   ]
 }

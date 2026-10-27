@@ -8,13 +8,18 @@ usage: scripts/guardrail.py PROFILE.json [--dry-run] [--config agents/guardrail-
                                    propose parameters + source quote, as JSON
   3. quote check (script)          is each source_quote on the page it cites?
   4. judge (LLM, no tools)         does the quote support the parameters?
-  5. assembler (LLM, no tools)     test cases for the selected controls
-  6. reviewer (LLM, no tools)      advisory findings
+  5. policy (script)               policy.json with an evidence tier per control
+  6. assembler (LLM, no tools)     test cases; script fills any control without one
+  7. reviewer (LLM, no tools)      advisory findings
+  8. renderers (script)            Bedrock / NeMo drafts, unsupported items listed
 
 Only cloud models are allowed (see pipeline.enforce_cloud_models).
 The profile must be SANITIZED: it is sent to the model provider.
 
-Writes outputs/<run>/ (evidence.json plus stage outputs) and logs/<run>/.
+Writes outputs/<run>/: policy.json (canonical, schema-validated),
+exceptions.md (tiers, waivers, every dropped proposal and why), tests.jsonl
+(>= 1 test per selected control), evidence.json, bedrock-guardrail.json /
+nemo-config.yml with their reports; plus logs/<run>/.
 --dry-run validates the profile, selects controls and prints the prompts
 without calling any model.
 
@@ -55,6 +60,9 @@ def _load(name: str, file: str):
 
 SEL = _load("select_controls", "select-controls.py")
 GEN = _load("gen_configs", "gen-configs.py")
+RB = _load("render_bedrock", "render-bedrock.py")
+RN = _load("render_nemo", "render-nemo.py")
+import guardrail_policy as GP  # noqa: E402
 
 CONFIG = "agents/guardrail-policy-generator.yaml"
 DEFAULTS = {
@@ -210,8 +218,7 @@ def sources_block(pages: list[P.Page], controls: list[dict], budget: int) -> tup
 # --------------------------------------------------------------------------
 # Prompts
 # --------------------------------------------------------------------------
-def control_line(c: dict) -> str:
-    return f"{c['id']} | {c['category']} | {c['name']} | {c['description']}"
+control_line = SEL.control_line
 
 
 def specialist_prompt(profile: dict, controls: list[dict], sources: str = "") -> str:
@@ -236,28 +243,60 @@ def extract_json(text: str, opener: str):
     return None
 
 
+def extract_objects(text: str) -> list:
+    """Every top-level JSON object in text that has a control_id."""
+    dec, out, i = json.JSONDecoder(), [], 0
+    text = re.sub(r"```(?:json)?", "", text)
+    while True:
+        i = text.find("{", i)
+        if i < 0:
+            return out
+        try:
+            obj, end = dec.raw_decode(text[i:])
+        except ValueError:
+            i += 1
+            continue
+        if isinstance(obj, dict) and "control_id" in obj:
+            out.append(obj)
+            i += end
+        else:
+            i += 1
+
+
 def is_value(v) -> bool:
     if isinstance(v, (str, bool, int, float)):
         return True
     return isinstance(v, list) and all(isinstance(x, (str, bool, int, float)) for x in v)
 
 
-def parse_proposals(text: str, allowed_ids: set[str]) -> tuple[list[dict], list[dict]]:
-    """Return (valid proposals, rejected items with reason)."""
+def parse_proposals(text: str, allowed: dict[str, list[str]]) -> tuple[list[dict], list[dict]]:
+    """Return (valid proposals, rejected items with reason). `allowed` maps
+    each control id assigned to this specialist to its allowed parameter keys."""
     data = extract_json(text, "[")
-    if not isinstance(data, list):
-        return [], [{"item": text[:200], "reason": "output is not a JSON array"}]
+    if not isinstance(data, list) or not data:
+        # Fall back to every well-formed object that has a control_id, so one
+        # broken item (or a truncated array) does not lose the others.
+        data = extract_objects(text)
+        if not data:
+            return [], [] if re.fullmatch(r"\s*(```(json)?\s*)?\[\s*\](\s*```)?\s*", text) else \
+                [{"item": text[:200], "reason": "output contains no JSON proposal objects"}]
     ok, bad = [], []
+    unparsed = text.count('"control_id"') - len(data)
+    if unparsed > 0:
+        bad.append({"item": text[:200], "reason": f"{unparsed} proposal(s) in the output were not valid JSON"})
     for item in data:
         why = None
         if not isinstance(item, dict):
             why = "not an object"
-        elif item.get("control_id") not in allowed_ids:
+        elif item.get("control_id") not in allowed:
             why = f"control_id {item.get('control_id')!r} was not assigned to this specialist"
         elif not isinstance(item.get("parameters"), dict) or not item["parameters"]:
             why = "no parameters"
         elif not all(PARAM_NAME.match(str(k)) and is_value(v) for k, v in item["parameters"].items()):
             why = "parameter names must be snake_case and values scalar or list"
+        elif set(item["parameters"]) - set(allowed[item["control_id"]]):
+            extra = sorted(set(item["parameters"]) - set(allowed[item["control_id"]]))
+            why = f"parameter key(s) {extra} not in allowed_parameter_keys for {item['control_id']}"
         elif not isinstance(item.get("source_url"), str) or not item["source_url"].startswith("https://"):
             why = "missing or non-https source_url"
         elif not isinstance(item.get("source_quote"), str) or not item["source_quote"].strip():
@@ -404,7 +443,7 @@ def main(argv=None) -> int:
     evidence["pages"] = P.save_pages([p for r in runs.values() for p in r.pages], ROOT / "fetched")
     proposals = []
     for cat, r in runs.items():
-        ok, bad = parse_proposals(r.final, {c["id"] for c in work[cat]})
+        ok, bad = parse_proposals(r.final, {c["id"]: c["allowed_parameter_keys"] for c in work[cat]})
         proposals += ok
         evidence["rejected"] += [dict(b, category=cat) for b in bad]
     (out / "specialists.json").write_text(json.dumps(proposals, indent=2) + "\n", encoding="utf-8")
@@ -414,7 +453,9 @@ def main(argv=None) -> int:
     facts = [to_fact(i, p, by_id[p["control_id"]]["name"]) for i, p in enumerate(proposals, 1)]
     P.check_quotes(facts, pages)
     pending = [f for f in facts if not f.verdict]
+    judged = {f.n for f in pending}
     log(f"quote check: {len(pending)} found on page, {len(facts) - len(pending)} rejected")
+    stage_failures = list(failed)
     if pending:
         jr = P.run_agent(args.config, "judge", "\n".join(f"[{f.n}] {f.line}" for f in pending),
                          logs / "judge.ndjson", args.timeout)
@@ -426,35 +467,66 @@ def main(argv=None) -> int:
                               rationale=p["rationale"]) for f, p in zip(facts, proposals)]
     evidence["verdict_counts"] = {v: sum(f.verdict == v for f in facts) for v in P.VERDICTS}
     grounded = [dict(p, source_url=f.url) for f, p in zip(facts, proposals) if f.verdict == "SUPPORTED"]
-    (out / "grounded.json").write_text(json.dumps(grounded, indent=2) + "\n", encoding="utf-8")
     log("verdicts: " + ", ".join(f"{k}={v}" for k, v in evidence["verdict_counts"].items()))
 
-    # 6. assembler: test cases for every selected control
-    controls_in = [{"control_id": i, "name": by_id[i]["name"], "category": by_id[i]["category"],
-                    "grounded": [g for g in grounded if g["control_id"] == i]} for i in selection["selected"]]
+    # Every proposal that is not used is listed in exceptions.md with its reason.
+    dropped = [{"control_id": r["item"].get("control_id", "?") if isinstance(r["item"], dict) else "?",
+                "stage": f"{r['category']} specialist output", "reason": r["reason"],
+                "detail": json.dumps(r["item"])[:200] if isinstance(r["item"], dict) else str(r["item"])[:200]}
+               for r in evidence["rejected"]]
+    for f, p in zip(facts, proposals):
+        if f.verdict != "SUPPORTED":
+            dropped.append({"control_id": p["control_id"],
+                            "stage": "judge" if f.n in judged else "quote check",
+                            "reason": f"{f.verdict}: {f.note}",
+                            "detail": f"{json.dumps(p['parameters'])} from {f.url}"})
+
+    # 8. canonical policy
+    policy, conflicts = GP.build_policy(profile, catalog, selection, grounded, run_id)
+    dropped += conflicts
+    errors = GP.validate_policy(policy)
+    (out / "policy.json").write_text(json.dumps(policy, indent=2) + "\n", encoding="utf-8")
+    if errors:
+        evidence["policy_errors"] = errors
+        return finish(1, "CHECKS FAILED: policy.json does not match schemas/policy.schema.json")
+
+    # 6. assembler: test cases (script fallback for any control without one)
+    controls_in = [{"control_id": c["control_id"], "name": c["name"], "category": c["category"], "tier": c["tier"],
+                    "parameters": {p["name"]: p["value"] for p in c["parameters"]}} for c in policy["controls"]]
     ar = P.run_agent(args.config, "assembler", json.dumps({"controls": controls_in}, indent=1),
                      logs / "assembler.ndjson", args.timeout)
     stage(ar)
     assembled = extract_json(ar.final, "{") if ar.rc == 0 else None
     if not isinstance(assembled, dict):
-        return finish(2, "BRIEFING FAILED: assembler returned no usable output")
-    (out / "assembler.json").write_text(json.dumps(assembled, indent=2) + "\n", encoding="utf-8")
+        stage_failures.append("assembler")
+        assembled = {}
+    tests, bad_tests = GP.build_tests(policy, assembled.get("tests", []))
+    dropped += bad_tests
 
     # 7. reviewer: advisory findings
     rr = P.run_agent(args.config, "reviewer",
-                     json.dumps({"profile": profile, "controls": controls_in, "tests": assembled.get("tests", [])}, indent=1),
+                     json.dumps({"profile": profile, "controls": controls_in, "tests": tests}, indent=1),
                      logs / "reviewer.ndjson", args.timeout)
     stage(rr)
     review = extract_json(rr.final, "{") if rr.rc == 0 else None
     if not isinstance(review, dict):
-        return finish(2, "BRIEFING FAILED: reviewer returned no usable output")
+        stage_failures.append("reviewer")
+        review = {"findings": []}
+
+    (out / "tests.jsonl").write_text("".join(json.dumps(t) + "\n" for t in tests), encoding="utf-8")
+    (out / "exceptions.md").write_text(
+        GP.exceptions_md(policy, catalog, dropped, failed, review.get("findings", []), tests), encoding="utf-8")
     (out / "review.json").write_text(json.dumps(review, indent=2) + "\n", encoding="utf-8")
+    for renderer in (RB, RN):
+        renderer.main([str(out / "policy.json")])
+    evidence["dropped"] = len(dropped)
+    evidence["tiers"] = {t: sum(c["tier"] == t for c in policy["controls"]) for t in ("grounded", "catalog-default")}
+    evidence["tiers"]["excluded"] = len(policy["excluded"])
 
-    if failed:
-        return finish(2, f"BRIEFING FAILED: specialist(s) {', '.join(failed)} returned no usable output "
-                         f"(other outputs written)")
-    return finish(0, f"OK: {len(grounded)} grounded proposal(s) for {len(selection['selected'])} selected controls")
-
+    if stage_failures:
+        return finish(2, f"BRIEFING FAILED: {', '.join(stage_failures)} returned no usable output (other outputs written)")
+    t = evidence["tiers"]
+    return finish(0, f"OK: {t['grounded']} grounded, {t['catalog-default']} catalog-default, {t['excluded']} excluded")
 
 if __name__ == "__main__":
     sys.exit(main())

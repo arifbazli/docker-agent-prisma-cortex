@@ -1,4 +1,6 @@
-# Palo Alto Networks Prisma AIRS (AI Runtime Security).
-https://docs.paloaltonetworks.com/prisma-airs/getting-started/ai-runtime-security-overview
-https://docs.paloaltonetworks.com/prisma-airs/ai-gateway/ai-gateway-overview
-https://pan.dev/airs/
+# Palo Alto Networks Prisma AIRS AI Runtime API (pan.dev). The product docs
+# on docs.paloaltonetworks.com load their text with JavaScript, so a plain
+# fetch returns almost nothing; these API pages are plain HTML.
+https://pan.dev/prisma-airs/api/airuntimesecurity/airuntimesecurityapi/
+https://pan.dev/prisma-airs/api/airuntimesecurity/usecases/
+https://pan.dev/prisma-airs/api/airuntimesecurity/scan/scan-sync-request/

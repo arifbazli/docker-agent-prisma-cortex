@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Select the guardrail controls that apply to an app profile.
 
-usage: scripts/select-controls.py PROFILE.json [--ids] [--catalog seeds/guardrail-catalog.json]
+usage: scripts/select-controls.py PROFILE.json [--ids | --lines] [--catalog seeds/guardrail-catalog.json]
 
 Deterministic: evaluates each control's `applies_when` rule from the
 catalog against the profile. No model is involved.
 
 Output (stdout, JSON): {"selected": [ids], "excluded": [{"control_id", "reason"}],
 "by_category": {category: [ids]}}. With --ids, one selected id per line.
+With --lines, the PROFILE: line and SELECTED CONTROLS: block the agent-only
+mode root agent expects.
 
 Exit codes: 0 ok, 64 usage error or invalid profile/catalog.
 """
@@ -85,6 +87,12 @@ def applies(rule: dict, profile: dict) -> tuple[bool, str]:
     return ok, "requires one of: " + "; ".join(describe(c) for c in conds)
 
 
+def control_line(c: dict) -> str:
+    """One control as the specialists receive it."""
+    return (f"{c['id']} | {c['category']} | {c['name']} | {c['description']} | "
+            f"keys: {', '.join(c['allowed_parameter_keys'])}")
+
+
 def select(profile: dict, catalog: dict) -> dict:
     selected, excluded = [], []
     by_category = {c["id"]: [] for c in catalog["categories"]}
@@ -102,6 +110,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Select guardrail controls for an app profile (no LLM).")
     ap.add_argument("profile")
     ap.add_argument("--ids", action="store_true", help="print selected ids only, one per line")
+    ap.add_argument("--lines", action="store_true", help="print the message for agent-only mode")
     ap.add_argument("--catalog", default=str(CATALOG))
     try:
         args = ap.parse_args(argv)
@@ -120,6 +129,11 @@ def main(argv=None) -> int:
     result = select(profile, catalog)
     if args.ids:
         print("\n".join(result["selected"]))
+    elif args.lines:
+        by_id = {c["id"]: c for c in catalog["controls"]}
+        print("PROFILE: " + json.dumps(profile, sort_keys=True))
+        print("SELECTED CONTROLS:")
+        print("\n".join(control_line(by_id[i]) for i in result["selected"]))
     else:
         print(json.dumps(result, indent=2))
     return 0
