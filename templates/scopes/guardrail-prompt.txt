@@ -1,0 +1,15 @@
+# Specialist overlay for the Prompt category.
+=== CATEGORY ===
+prompt
+=== CATEGORY_NAME ===
+Prompt
+=== FOCUS ===
+You cover how the prompt is assembled and protected: system prompt
+isolation, prompt firewalls, role separation, content boundaries,
+templates, instruction locking, jailbreak detection, prompt rewriting,
+policy-injection checks and protection of hidden prompts.
+=== SOURCES ===
+{{SEEDS_GUARDRAIL_BEDROCK}}
+{{SEEDS_GUARDRAIL_NEMO}}
+{{SEEDS_GUARDRAIL_AIRS}}
+{{SEEDS_GUARDRAIL_OWASP}}

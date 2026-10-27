@@ -1,0 +1,460 @@
+#!/usr/bin/env python3
+"""Guardrail policy generator, pipeline mode.
+
+usage: scripts/guardrail.py PROFILE.json [--dry-run] [--config agents/guardrail-policy-generator.yaml]
+
+  1. select-controls (script)      which catalog controls apply to the profile
+  2. specialists (LLM, fetch)      one per category WITH selected controls;
+                                   propose parameters + source quote, as JSON
+  3. quote check (script)          is each source_quote on the page it cites?
+  4. judge (LLM, no tools)         does the quote support the parameters?
+  5. assembler (LLM, no tools)     test cases for the selected controls
+  6. reviewer (LLM, no tools)      advisory findings
+
+Only cloud models are allowed (see pipeline.enforce_cloud_models).
+The profile must be SANITIZED: it is sent to the model provider.
+
+Writes outputs/<run>/ (evidence.json plus stage outputs) and logs/<run>/.
+--dry-run validates the profile, selects controls and prints the prompts
+without calling any model.
+
+Exit codes: 0 ok, 1 checks failed, 2 a step failed, 64 usage / invalid input.
+Standard library only.
+"""
+from __future__ import annotations
+
+import argparse
+import concurrent.futures as cf
+import datetime as dt
+import hashlib
+import html
+import importlib.util
+import json
+import os
+import re
+import sys
+import time
+import urllib.error
+import urllib.request
+from dataclasses import asdict
+from html.parser import HTMLParser
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+import pipeline as P  # noqa: E402
+
+
+
+def _load(name: str, file: str):
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / file)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+SEL = _load("select_controls", "select-controls.py")
+GEN = _load("gen_configs", "gen-configs.py")
+
+CONFIG = "agents/guardrail-policy-generator.yaml"
+DEFAULTS = {
+    "OLLAMA_BASE_URL": "http://localhost:11434/v1",
+    "ROUTER_MODEL": "nemotron-3-super:cloud",
+    "SPECIALIST_MODEL": "nemotron-3-nano:30b-cloud",
+    "REVIEWER_MODEL": "nemotron-3-super:cloud",
+    "JUDGE_MODEL": "gpt-oss:120b-cloud",
+}
+MODEL_VARS = ("ROUTER_MODEL", "SPECIALIST_MODEL", "REVIEWER_MODEL", "JUDGE_MODEL")
+PARAM_NAME = re.compile(r"^[a-z][a-z0-9_]{0,59}$")
+
+
+def log(msg: str) -> None:
+    print(f"[guardrail] {msg}", file=sys.stderr, flush=True)
+
+
+def load_dotenv(path: Path) -> None:
+    """Export KEY=VALUE lines from .env without overriding the environment."""
+    if not path.exists():
+        return
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        k = k.removeprefix("export ").strip()
+        v = v.strip()
+        if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+            v = v[1:-1]
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", k) and k not in os.environ:
+            os.environ[k] = v
+
+
+# --------------------------------------------------------------------------
+# Sources: start pages are fetched ONCE by this script (cached), and the
+# specialists get relevant excerpts. This bounds cost and time, and the
+# quote check runs against exactly the text the specialist was given.
+# --------------------------------------------------------------------------
+USER_AGENT = "docker-agent-prisma-cortex guardrail-policy-generator (+https://github.com/arifbazli/docker-agent-prisma-cortex)"
+SKIP_TAGS = {"script", "style", "nav", "header", "footer", "noscript", "svg", "form", "aside", "button", "template"}
+BLOCK_TAGS = {"p", "li", "h1", "h2", "h3", "h4", "h5", "h6", "div", "tr", "br", "section", "pre",
+              "td", "th", "dd", "dt", "table", "ul", "ol", "article", "main", "blockquote"}
+STOP = set("""about above after again against also because been before being below between both
+could does doing down during each from further have having here into itself just more most other
+over same should some such than that their them then there these they this those through under
+until very what when where which while with would your input output before reach""".split())
+HINT_WORDS = ["threshold", "strength", "limit", "filter", "block", "mask", "rail", "timeout", "maximum",
+              "minimum", "deny", "allow", "configure", "detect", "policy", "score", "level", "action"]
+
+
+class _Text(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.out, self.skip = [], 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in SKIP_TAGS:
+            self.skip += 1
+        elif tag in BLOCK_TAGS:
+            self.out.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag in SKIP_TAGS and self.skip:
+            self.skip -= 1
+        elif tag in BLOCK_TAGS:
+            self.out.append("\n")
+
+    def handle_data(self, data):
+        if not self.skip:
+            self.out.append(data)
+
+
+def html_to_text(raw: str) -> str:
+    p = _Text()
+    p.feed(raw)
+    lines = (re.sub(r"[ \t\r\f\v]+", " ", ln).strip() for ln in "".join(p.out).splitlines())
+    return "\n".join(ln for ln in lines if ln)
+
+
+def category_sources(cat: str) -> list[str]:
+    """Start pages for a category, from its scope file's SOURCES section."""
+    scope = GEN.load_scope(ROOT / "templates" / "scopes" / f"guardrail-{cat}.txt")
+    text = GEN.render(scope["SOURCES"], GEN.load_seeds(), f"guardrail-{cat}.txt[SOURCES]")
+    return [u.strip() for u in text.splitlines() if u.strip().startswith("https://")]
+
+
+def fetch_page(url: str, cache: Path, max_age_days: float) -> P.Page:
+    reason = P.banned_url(url)
+    if reason:
+        return P.Page(url, False, None, "", reason)
+    cache.mkdir(parents=True, exist_ok=True)
+    path = cache / (hashlib.sha1(url.encode()).hexdigest()[:16] + ".txt")
+    if path.exists() and time.time() - path.stat().st_mtime < max_age_days * 86400:
+        return P.Page(url, True, 200, path.read_text(encoding="utf-8"))
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,text/markdown,text/plain"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            raw = resp.read(3_000_000).decode(resp.headers.get_content_charset() or "utf-8", "replace")
+            status, ctype = resp.status, resp.headers.get_content_type()
+    except (urllib.error.URLError, TimeoutError, OSError) as e:
+        return P.Page(url, False, getattr(e, "code", None), "", str(e)[:200])
+    text = html_to_text(raw) if "html" in ctype or raw.lstrip()[:15].lower().startswith(("<!doctype", "<html")) else raw
+    if re.search(r"(?m)^#?\s*Page Not Found", text[:500]):
+        return P.Page(url, False, 404, "", "page not found")
+    path.write_text(text, encoding="utf-8")
+    return P.Page(url, True, status, text)
+
+
+def keywords(controls: list[dict]) -> set[str]:
+    words = set(HINT_WORDS)
+    for c in controls:
+        for w in re.findall(r"[a-z][a-z-]{3,}", (c["name"] + " " + c["description"]).lower()):
+            if w not in STOP:
+                words.add(w.rstrip("s"))
+    return words
+
+
+def excerpt(text: str, words: set[str], budget: int) -> str:
+    """Highest-scoring paragraphs (by distinct keyword hits) within budget,
+    kept in page order."""
+    paras = [(i, ln) for i, ln in enumerate(text.splitlines()) if len(ln) >= 30]
+    scored = []
+    for i, ln in paras:
+        low = ln.lower()
+        score = sum(1 for w in words if w in low)
+        if score:
+            scored.append((score, i, ln))
+    keep, used = [], 0
+    for score, i, ln in sorted(scored, key=lambda t: (-t[0], t[1])):
+        if used + len(ln) > budget:
+            continue
+        keep.append((i, ln))
+        used += len(ln) + 1
+    return "\n".join(ln for _, ln in sorted(keep))
+
+
+def sources_block(pages: list[P.Page], controls: list[dict], budget: int) -> tuple[str, list[dict]]:
+    good = [p for p in pages if p.ok and p.body]
+    if not good:
+        return "", []
+    per_page = max(1500, budget // len(good))
+    words = keywords(controls)
+    parts, meta = [], []
+    for p in good:
+        ex = excerpt(p.body, words, per_page)
+        if ex:
+            parts.append(f"=== SOURCE {p.url} ===\n{ex}")
+        meta.append({"url": p.url, "chars": len(p.body), "excerpt_chars": len(ex)})
+    return "\n\n".join(parts), meta
+
+
+# --------------------------------------------------------------------------
+# Prompts
+# --------------------------------------------------------------------------
+def control_line(c: dict) -> str:
+    return f"{c['id']} | {c['category']} | {c['name']} | {c['description']}"
+
+
+def specialist_prompt(profile: dict, controls: list[dict], sources: str = "") -> str:
+    text = ("PROFILE: " + json.dumps(profile, sort_keys=True) + "\nCONTROLS:\n"
+            + "\n".join(control_line(c) for c in controls))
+    return text + ("\n\nSOURCES:\n" + sources if sources else "")
+
+
+# --------------------------------------------------------------------------
+# Parsing specialist output
+# --------------------------------------------------------------------------
+def extract_json(text: str, opener: str):
+    """Return the first JSON value starting with `opener` ('[' or '{') in text."""
+    text = re.sub(r"```(?:json)?", "", text)
+    dec = json.JSONDecoder()
+    for m in re.finditer(re.escape(opener), text):
+        try:
+            value, _ = dec.raw_decode(text[m.start():])
+            return value
+        except ValueError:
+            continue
+    return None
+
+
+def is_value(v) -> bool:
+    if isinstance(v, (str, bool, int, float)):
+        return True
+    return isinstance(v, list) and all(isinstance(x, (str, bool, int, float)) for x in v)
+
+
+def parse_proposals(text: str, allowed_ids: set[str]) -> tuple[list[dict], list[dict]]:
+    """Return (valid proposals, rejected items with reason)."""
+    data = extract_json(text, "[")
+    if not isinstance(data, list):
+        return [], [{"item": text[:200], "reason": "output is not a JSON array"}]
+    ok, bad = [], []
+    for item in data:
+        why = None
+        if not isinstance(item, dict):
+            why = "not an object"
+        elif item.get("control_id") not in allowed_ids:
+            why = f"control_id {item.get('control_id')!r} was not assigned to this specialist"
+        elif not isinstance(item.get("parameters"), dict) or not item["parameters"]:
+            why = "no parameters"
+        elif not all(PARAM_NAME.match(str(k)) and is_value(v) for k, v in item["parameters"].items()):
+            why = "parameter names must be snake_case and values scalar or list"
+        elif not isinstance(item.get("source_url"), str) or not item["source_url"].startswith("https://"):
+            why = "missing or non-https source_url"
+        elif not isinstance(item.get("source_quote"), str) or not item["source_quote"].strip():
+            why = "missing source_quote"
+        if why:
+            bad.append({"item": item, "reason": why})
+            continue
+        ok.append({
+            "control_id": item["control_id"],
+            "parameters": item["parameters"],
+            "rationale": str(item.get("rationale") or "").strip(),
+            "source_url": P.clean_url(item["source_url"]),
+            "source_quote": item["source_quote"].strip().strip('"'),
+        })
+    return ok, bad
+
+
+def to_fact(n: int, prop: dict, name: str) -> P.Fact:
+    params = json.dumps(prop["parameters"], sort_keys=True)
+    line = (f"CONTROL: {prop['control_id']} {name} | PARAMETERS: {params} | "
+            f"RATIONALE: {prop['rationale'] or 'none'} | QUOTE: \"{prop['source_quote']}\" | URL: {prop['source_url']}")
+    return P.Fact(n=n, line=line, fact=params, product="guardrail", module=prop["control_id"],
+                  quote=prop["source_quote"], url=prop["source_url"], month="unknown")
+
+
+# --------------------------------------------------------------------------
+# Main
+# --------------------------------------------------------------------------
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="Generate an advisory guardrail policy from a sanitized app profile.")
+    ap.add_argument("profile")
+    ap.add_argument("-c", "--config", default=os.environ.get("GUARDRAIL_CFG", CONFIG))
+    ap.add_argument("--out-dir", default=os.environ.get("OUT_DIR", "outputs"))
+    ap.add_argument("--timeout", type=int, default=int(os.environ.get("STAGE_TIMEOUT", "900")))
+    ap.add_argument("--parallel", type=int, default=int(os.environ.get("GUARDRAIL_PARALLEL", "3")))
+    ap.add_argument("--dry-run", action="store_true", help="select controls and print prompts; no model calls")
+    try:
+        args = ap.parse_args(argv)
+    except SystemExit as e:
+        return 64 if e.code else 0
+
+    load_dotenv(ROOT / ".env")
+    for k, v in DEFAULTS.items():
+        os.environ.setdefault(k, v)
+    os.environ.setdefault("TELEMETRY_ENABLED", "false")
+    rc = P.enforce_cloud_models({k: os.environ[k] for k in MODEL_VARS})
+    if rc:
+        return rc
+
+    try:
+        profile = json.loads(Path(args.profile).read_text(encoding="utf-8"))
+        catalog = SEL.load_catalog()
+    except (OSError, ValueError) as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 64
+    errors = SEL.validate_profile(profile)
+    if errors:
+        print("invalid profile:\n  " + "\n  ".join(errors), file=sys.stderr)
+        return 64
+    if not (ROOT / args.config).exists():
+        print(f"config not found: {args.config}", file=sys.stderr)
+        return 64
+
+    by_id = {c["id"]: c for c in catalog["controls"]}
+    selection = SEL.select(profile, catalog)
+    work = {cat: [by_id[i] for i in ids] for cat, ids in selection["by_category"].items() if ids}
+    log(f"selected {len(selection['selected'])}/{len(by_id)} controls in {len(work)} categories")
+
+    if args.dry_run:
+        for cat, ctls in work.items():
+            urls = "\n".join(f"  {u}" for u in category_sources(cat))
+            print(f"===== {cat}_specialist =====\n{specialist_prompt(profile, ctls)}\nSTART PAGES:\n{urls}\n")
+        return 0
+
+    name = P.slugify(profile.get("name") or Path(args.profile).stem)
+    run_id = f"{dt.datetime.now().strftime('%Y%m%d-%H%M%S')}-guardrail-{name}"
+    out = ROOT / args.out_dir / run_id
+    logs = ROOT / "logs" / run_id
+    out.mkdir(parents=True, exist_ok=True)
+    t0 = time.time()
+    evidence = {
+        "run_id": run_id, "question": f"guardrail policy for profile {name}", "config": args.config,
+        "mode": "guardrail-pipeline", "models": {k: os.environ[k] for k in MODEL_VARS},
+        "catalog_version": catalog["catalog_version"], "selection": selection,
+        "stages": {}, "facts": [], "pages": {}, "rejected": [],
+    }
+
+    def stage(r: P.AgentRun) -> None:
+        evidence["stages"][r.agent] = {
+            "rc": r.rc, "seconds": r.seconds, "fetch_calls": r.fetch_calls,
+            "pages": [{"url": p.url, "ok": p.ok, "status": p.status, "error": p.error} for p in r.pages],
+            "errors": r.errors,
+        }
+
+    def finish(code: int, result: str) -> int:
+        evidence["result"] = result
+        evidence["exit_code"] = code
+        evidence["seconds_total"] = round(time.time() - t0, 1)
+        (out / "evidence.json").write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
+        (ROOT / args.out_dir / ".last-guardrail").write_text(f"{args.out_dir}/{run_id}\n", encoding="utf-8")
+        log(f"{result} -> {args.out_dir}/{run_id}/ ({evidence['seconds_total']}s)")
+        return code
+
+    # 2. start pages, fetched once by this script (cached under fetched/guardrail/)
+    budget = int(os.environ.get("GUARDRAIL_CONTEXT_CHARS", "24000"))
+    cache_days = float(os.environ.get("GUARDRAIL_CACHE_DAYS", "7"))
+    page_cache: dict[str, P.Page] = {}
+    prompts, evidence["sources"] = {}, {}
+    for cat, ctls in work.items():
+        cat_pages = []
+        for url in category_sources(cat):
+            if url not in page_cache:
+                page_cache[url] = fetch_page(url, ROOT / "fetched" / "guardrail", cache_days)
+            cat_pages.append(page_cache[url])
+        block, meta = sources_block(cat_pages, ctls, budget)
+        evidence["sources"][cat] = meta + [{"url": p.url, "error": p.error} for p in cat_pages if not p.ok]
+        prompts[cat] = specialist_prompt(profile, ctls, block)
+    bad_pages = [u for u, p in page_cache.items() if not p.ok]
+    log(f"sources: {len(page_cache) - len(bad_pages)}/{len(page_cache)} start pages available")
+
+    # 3. specialists, in parallel (one retry each)
+    def run_specialist(cat: str):
+        agent = f"{cat}_specialist"
+        r = P.run_agent(args.config, agent, prompts[cat], logs / f"{agent}.ndjson", args.timeout)
+        if r.rc != 0 or not r.final:
+            log(f"{agent}: retrying once")
+            r = P.run_agent(args.config, agent, prompts[cat], logs / f"{agent}.retry.ndjson", args.timeout)
+        return cat, r
+
+    runs: dict[str, P.AgentRun] = {}
+    with cf.ThreadPoolExecutor(max_workers=max(1, args.parallel)) as pool:
+        for cat, r in pool.map(run_specialist, list(work)):
+            runs[cat] = r
+            stage(r)
+    failed = [c for c, r in runs.items() if r.rc != 0 or not r.final]
+    evidence["failed_specialists"] = failed
+    if failed and len(failed) == len(runs):
+        return finish(2, "BRIEFING FAILED: every specialist returned no usable output")
+    runs = {c: r for c, r in runs.items() if c not in failed}
+
+    # Quote check uses the provided pages (full text) plus anything a
+    # specialist fetched itself despite the instructions.
+    pages = [p for p in page_cache.values() if p.ok] + [p for r in runs.values() for p in r.pages]
+    evidence["pages"] = P.save_pages([p for r in runs.values() for p in r.pages], ROOT / "fetched")
+    proposals = []
+    for cat, r in runs.items():
+        ok, bad = parse_proposals(r.final, {c["id"] for c in work[cat]})
+        proposals += ok
+        evidence["rejected"] += [dict(b, category=cat) for b in bad]
+    (out / "specialists.json").write_text(json.dumps(proposals, indent=2) + "\n", encoding="utf-8")
+    log(f"specialists: {len(proposals)} proposal(s), {len(evidence['rejected'])} rejected as malformed")
+
+    # 4. quote check, 5. judge
+    facts = [to_fact(i, p, by_id[p["control_id"]]["name"]) for i, p in enumerate(proposals, 1)]
+    P.check_quotes(facts, pages)
+    pending = [f for f in facts if not f.verdict]
+    log(f"quote check: {len(pending)} found on page, {len(facts) - len(pending)} rejected")
+    if pending:
+        jr = P.run_agent(args.config, "judge", "\n".join(f"[{f.n}] {f.line}" for f in pending),
+                         logs / "judge.ndjson", args.timeout)
+        stage(jr)
+        if jr.rc != 0 or not jr.final:
+            return finish(2, "BRIEFING FAILED: judge returned no usable output")
+        P.apply_judge(facts, jr.final)
+    evidence["facts"] = [dict(asdict(f), control_id=p["control_id"], parameters=p["parameters"],
+                              rationale=p["rationale"]) for f, p in zip(facts, proposals)]
+    evidence["verdict_counts"] = {v: sum(f.verdict == v for f in facts) for v in P.VERDICTS}
+    grounded = [dict(p, source_url=f.url) for f, p in zip(facts, proposals) if f.verdict == "SUPPORTED"]
+    (out / "grounded.json").write_text(json.dumps(grounded, indent=2) + "\n", encoding="utf-8")
+    log("verdicts: " + ", ".join(f"{k}={v}" for k, v in evidence["verdict_counts"].items()))
+
+    # 6. assembler: test cases for every selected control
+    controls_in = [{"control_id": i, "name": by_id[i]["name"], "category": by_id[i]["category"],
+                    "grounded": [g for g in grounded if g["control_id"] == i]} for i in selection["selected"]]
+    ar = P.run_agent(args.config, "assembler", json.dumps({"controls": controls_in}, indent=1),
+                     logs / "assembler.ndjson", args.timeout)
+    stage(ar)
+    assembled = extract_json(ar.final, "{") if ar.rc == 0 else None
+    if not isinstance(assembled, dict):
+        return finish(2, "BRIEFING FAILED: assembler returned no usable output")
+    (out / "assembler.json").write_text(json.dumps(assembled, indent=2) + "\n", encoding="utf-8")
+
+    # 7. reviewer: advisory findings
+    rr = P.run_agent(args.config, "reviewer",
+                     json.dumps({"profile": profile, "controls": controls_in, "tests": assembled.get("tests", [])}, indent=1),
+                     logs / "reviewer.ndjson", args.timeout)
+    stage(rr)
+    review = extract_json(rr.final, "{") if rr.rc == 0 else None
+    if not isinstance(review, dict):
+        return finish(2, "BRIEFING FAILED: reviewer returned no usable output")
+    (out / "review.json").write_text(json.dumps(review, indent=2) + "\n", encoding="utf-8")
+
+    if failed:
+        return finish(2, f"BRIEFING FAILED: specialist(s) {', '.join(failed)} returned no usable output "
+                         f"(other outputs written)")
+    return finish(0, f"OK: {len(grounded)} grounded proposal(s) for {len(selection['selected'])} selected controls")
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,13 @@
+# Specialist overlay for the Runtime category.
+=== CATEGORY ===
+runtime
+=== CATEGORY_NAME ===
+Runtime
+=== FOCUS ===
+You cover operating the application: session and abuse monitoring,
+anomaly detection, latency, token and cost limits, loop detection,
+failure handling, fallback routing and concurrency control.
+=== SOURCES ===
+{{SEEDS_GUARDRAIL_NEMO}}
+{{SEEDS_GUARDRAIL_AIRS}}
+{{SEEDS_GUARDRAIL_OWASP}}

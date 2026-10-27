@@ -173,13 +173,11 @@ class Generator(unittest.TestCase):
             G.render("b: {{X}} tail", {"X": "1\n2"}, "t")
 
     def test_generated_configs_up_to_date(self):
-        template = G.TEMPLATE.read_text()
-        seeds = G.load_seeds()
-        for scope in sorted(G.SCOPES.glob("*.txt")):
-            target = G.OUT / f"{scope.stem}.yaml"
-            self.assertEqual(target.read_text(), G.build(scope, template, seeds),
-                             f"{target} is stale: run python3 scripts/gen-configs.py")
-
+        targets = G.targets(G.load_seeds())
+        names = sorted(t.name for t, _ in targets)
+        self.assertEqual(names, ["cortex-cloud-hub.yaml", "guardrail-policy-generator.yaml", "prisma-cortex-hub.yaml"])
+        for target, text in targets:
+            self.assertEqual(target.read_text(), text, f"{target} is stale: run python3 scripts/gen-configs.py")
 
 if __name__ == "__main__":
     unittest.main()

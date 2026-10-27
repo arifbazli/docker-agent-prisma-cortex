@@ -1,0 +1,4 @@
+# MITRE ATLAS. The site is a JavaScript app: plain fetches return no
+# technique text, so ATLAS ids come from seeds/guardrail-catalog.json and
+# this page is a reference only, never a quote source.
+https://atlas.mitre.org/

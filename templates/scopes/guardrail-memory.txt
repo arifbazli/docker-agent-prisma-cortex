@@ -1,0 +1,13 @@
+# Specialist overlay for the Memory category.
+=== CATEGORY ===
+memory
+=== CATEGORY_NAME ===
+Memory
+=== FOCUS ===
+You cover long- and short-term memory: retention and expiry, recall
+filtering, keeping sensitive data out of memory, per-user and
+per-session separation, write and edit controls, deletion and audit.
+=== SOURCES ===
+{{SEEDS_GUARDRAIL_NEMO}}
+{{SEEDS_GUARDRAIL_AIRS}}
+{{SEEDS_GUARDRAIL_OWASP}}

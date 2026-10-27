@@ -1,0 +1,13 @@
+# Specialist overlay for the Tool category.
+=== CATEGORY ===
+tool
+=== CATEGORY_NAME ===
+Tool
+=== FOCUS ===
+You cover tool and action use by agents: allowlists, approvals,
+permission and scope checks, transaction limits, sandboxing, logging,
+timeouts, retry limits and human confirmation.
+=== SOURCES ===
+{{SEEDS_GUARDRAIL_NEMO}}
+{{SEEDS_GUARDRAIL_AIRS}}
+{{SEEDS_GUARDRAIL_OWASP}}

@@ -1,0 +1,8 @@
+# Amazon Bedrock Guardrails (only /bedrock/latest/userguide/guardrails* pages may be cited).
+https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html
+https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-content-filters.html
+https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-prompt-attack.html
+https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-denied-topics.html
+https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-word-filters.html
+https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-sensitive-filters.html
+https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-contextual-grounding-check.html
