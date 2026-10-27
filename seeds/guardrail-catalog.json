@@ -1473,8 +1473,6 @@
               "gdpr",
               "hipaa",
               "pci_dss",
-              "sox",
-              "eu_ai_act",
               "pdpa"
             ]
           }

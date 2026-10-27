@@ -1,0 +1,13 @@
+{
+  "name": "rag-chatbot",
+  "uses_rag": true,
+  "has_tools": false,
+  "tool_list": [],
+  "has_memory": false,
+  "handles_pii": true,
+  "user_facing": true,
+  "autonomy_level": "none",
+  "cloud": "aws",
+  "data_classification": "internal",
+  "regulatory_context": ["gdpr"]
+}

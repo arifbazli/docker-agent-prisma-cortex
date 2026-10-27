@@ -1,0 +1,13 @@
+{
+  "name": "tool-agent",
+  "uses_rag": false,
+  "has_tools": true,
+  "tool_list": ["search", "send_email", "payments", "code_exec"],
+  "has_memory": false,
+  "handles_pii": false,
+  "user_facing": false,
+  "autonomy_level": "act_with_approval",
+  "cloud": "azure",
+  "data_classification": "confidential",
+  "regulatory_context": ["sox"]
+}

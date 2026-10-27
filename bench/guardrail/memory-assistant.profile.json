@@ -1,0 +1,13 @@
+{
+  "name": "memory-assistant",
+  "uses_rag": false,
+  "has_tools": false,
+  "tool_list": [],
+  "has_memory": true,
+  "handles_pii": true,
+  "user_facing": true,
+  "autonomy_level": "suggest",
+  "cloud": "gcp",
+  "data_classification": "confidential",
+  "regulatory_context": ["hipaa"]
+}
