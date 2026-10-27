@@ -1,0 +1,9 @@
+date	commit	profile	specialist_model	judge_model	seconds	exit	controls_selected	controls_grounded	controls_catalog_default	controls_excluded	params_vendor_grounded	check_policy	note
+2026-10-27	53332d5	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	226.1	0	47	7	40	23	9	not-run	rag-chatbot comparison: before (broad prompt) nano
+2026-10-27	53332d5	rag-chatbot	nemotron-3-super:cloud	gpt-oss:120b-cloud	214.3	0	47	5	42	23	6	not-run	rag-chatbot comparison: before (broad prompt) super
+2026-10-27	53332d5	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	166.4	0	47	2	45	23	3	not-run	rag-chatbot comparison: after v1 (per-key, null-biased) nano
+2026-10-27	53332d5	rag-chatbot	nemotron-3-super:cloud	gpt-oss:120b-cloud	106.7	0	47	4	43	23	6	not-run	rag-chatbot comparison: after v1 (per-key, null-biased) super
+2026-10-27	53332d5	rag-chatbot	nemotron-3-super:cloud	gpt-oss:120b-cloud	174.1	0	47	6	41	23	8	PASS	run-live (Step 5 code, run before it was committed)
+2026-10-27	53332d5	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	328.4	0	47	7	40	23	12	PASS	run-live (Step 5 code, run before it was committed)
+2026-10-27	53332d5	tool-agent	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	170.6	0	36	4	32	34	4	PASS	run-live (Step 5 code, run before it was committed)
+2026-10-27	53332d5	memory-assistant	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	320.3	0	45	4	41	25	6	PASS	run-live (Step 5 code, run before it was committed)

@@ -66,13 +66,30 @@ class Policy(unittest.TestCase):
         self.assertEqual(tiers["INPUT-10"], "grounded")
         self.assertEqual(tiers["INPUT-01"], "catalog-default")
         for c in policy["controls"]:
-            if c["tier"] == "catalog-default":
-                self.assertEqual(c["parameters"], [], "catalog-default controls must not carry parameters")
+            vendor = [p for p in c["parameters"] if p["basis"] == "vendor-grounded"]
+            self.assertEqual(c["tier"] == "grounded", bool(vendor), c["control_id"])
             for p in c["parameters"]:
-                self.assertTrue(p["source_url"].startswith("https://") and p["source_quote"])
+                if p["basis"] == "vendor-grounded":
+                    self.assertTrue(p["source_url"].startswith("https://") and p["source_quote"])
+                else:
+                    self.assertEqual(p["label"], "opinionated baseline, not vendor-backed")
+                    self.assertNotIn("source_url", p)
+        by = {c["control_id"]: c for c in policy["controls"]}
+        # vendor value overrides the default for the same key; other default keys stay
+        params = {p["name"]: p for p in by["INPUT-10"]["parameters"]}
+        self.assertEqual((params["prompt_attack_strength"]["value"], params["prompt_attack_strength"]["basis"]), ("high", "vendor-grounded"))
+        self.assertEqual(params["injection_action"]["basis"], "catalog-default")
+        self.assertEqual({p["name"] for p in by["INPUT-01"]["parameters"]}, {"reject_on_invalid", "max_input_chars"})
+        self.assertEqual(by["RETRIEVAL-01"]["parameters"], [])
         self.assertTrue(all(e["tier"] == "excluded" for e in policy["excluded"]))
         self.assertEqual(len(policy["controls"]) + len(policy["excluded"]), 70)
         self.assertEqual(len(conflicts), 1)
+        n = GP.counts(policy)
+        self.assertEqual(n["unit"], "control")
+        self.assertEqual(n["grounded"] + n["catalog_default"], n["selected"])
+        self.assertEqual(n["selected"] + n["excluded"], 70)
+        self.assertEqual(n["grounded"], 7)  # 8 proposals, 2 for INPUT-10 -> 7 controls
+        self.assertEqual(n["parameters_vendor_grounded"], 12)  # parameters are counted separately
         self.assertIn("prompt_attack_strength", conflicts[0]["reason"])
 
     def test_waivers_cover_empty_categories(self):
@@ -109,7 +126,8 @@ class Policy(unittest.TestCase):
         md = GP.exceptions_md(policy, CATALOG, dropped, ["retrieval"], [{"severity": "high", "scope": "OUTPUT-05", "issue": "i", "recommendation": "r"}], tests)
         for needle in ("ADVISORY", "NOT vendor-backed", "| Tool | 0 | 0 | 10 | WAIVED |", "| Memory | 0 | 0 | 10 | WAIVED |",
                        "OUTPUT-04", "PARTLY SUPPORTED", "allowed_parameter_keys", "conflicting value",
-                       "Failed specialists", "**retrieval**", "`OUTPUT-05`", "`TOOL-01`", "catalog-default (from the catalog only"):
+                       "Failed specialists", "**retrieval**", "`OUTPUT-05`", "`TOOL-01`", "catalog-default (catalog baseline values only", "Summary (counting unit: controls)",
+                       "opinionated baseline, not vendor-backed"):
             self.assertIn(needle, md)
         for c in policy["controls"]:
             if c["tier"] == "catalog-default":
@@ -126,7 +144,14 @@ class Renderers(unittest.TestCase):
         self.assertIn("INSULTS", filters)
         self.assertEqual(body["sensitiveInformationPolicyConfig"]["piiEntitiesConfig"],
                          [{"type": "EMAIL", "action": "ANONYMIZE"}, {"type": "PHONE", "action": "ANONYMIZE"}])
-        self.assertEqual(body["contextualGroundingPolicyConfig"]["filtersConfig"], [{"type": "GROUNDING", "threshold": 0.7}])
+        self.assertEqual(body["contextualGroundingPolicyConfig"]["filtersConfig"],
+                         [{"type": "GROUNDING", "threshold": 0.7}, {"type": "RELEVANCE", "threshold": 0.7}])
+        rel = next(m for m in mapped if m["field"].startswith("contextualGroundingPolicyConfig.filtersConfig[RELEVANCE]"))
+        self.assertEqual((rel["control_id"], rel["basis"]), ("RETRIEVAL-08", "catalog-default"))
+        # catalog defaults never overwrite vendor values
+        self.assertEqual(filters["HATE"]["inputStrength"], "MEDIUM")
+        taken = [u for u in unsupported if u["control_id"] == "OUTPUT-02" and u["parameter"] == "content_filter_strength"]
+        self.assertIn("already set", taken[0]["reason"])
         self.assertEqual(set(body) - {"name", "description", "blockedInputMessaging", "blockedOutputsMessaging",
                                       "contentPolicyConfig", "wordPolicyConfig", "sensitiveInformationPolicyConfig",
                                       "contextualGroundingPolicyConfig", "topicPolicyConfig"}, set())
@@ -135,18 +160,22 @@ class Renderers(unittest.TestCase):
         self.assertIn("definition", reasons[("OUTPUT-08", "denied_topics")]["reason"])
         self.assertIn(("INPUT-08", "requests_per_minute"), reasons)
         self.assertIn(("PROMPT-07", "jailbreak_heuristics"), reasons)
-        default = reasons[("INPUT-01", "-")]
-        self.assertEqual(default["tier"], "catalog-default")
-        self.assertIn("NOT vendor-backed", default["reason"])
-        self.assertTrue(all(m["tier"] == "grounded" for m in mapped))
+        empty = reasons[("RETRIEVAL-01", "-")]
+        self.assertEqual(empty["tier"], "catalog-default")
+        self.assertIn("configure by hand", empty["reason"])
+        for m in mapped:
+            self.assertEqual(m["tier"] == "catalog-default", m["basis"] == "catalog-default" or m["tier"] == "catalog-default")
+        self.assertTrue(any(m["basis"] == "catalog-default" for m in mapped))
+        self.assertEqual(body["wordPolicyConfig"]["managedWordListsConfig"], [{"type": "PROFANITY"}])
 
     def test_nemo_maps_only_real_flows(self):
         policy, _ = build()
         config, mapped, unsupported, _ = RN.render(policy)
         rails = config["rails"]
-        self.assertEqual(rails["input"]["flows"], ["jailbreak detection heuristics"])
+        self.assertEqual(rails["input"]["flows"][0], "jailbreak detection heuristics")  # vendor first
+        self.assertIn("self check input", rails["input"]["flows"])  # PROMPT-08 catalog default
         self.assertEqual(rails["config"]["jailbreak_detection"], {"length_per_perplexity_threshold": 89.79})
-        self.assertEqual(rails["output"]["flows"], ["mask sensitive data on output"])
+        self.assertEqual(rails["output"]["flows"][0], "mask sensitive data on output")
         self.assertEqual(rails["config"]["sensitive_data_detection"]["output"]["entities"], ["EMAIL_ADDRESS", "PHONE_NUMBER"])
         reasons = {(u["control_id"], u["parameter"]) for u in unsupported}
         self.assertIn(("INPUT-10", "prompt_attack_strength"), reasons)
@@ -164,7 +193,8 @@ class Renderers(unittest.TestCase):
                 self.assertTrue((Path(d) / f).exists(), f)
             report = (Path(d) / "bedrock-report.md").read_text()
             self.assertIn("catalog-default", report)
-            self.assertIn("| `INPUT-10` | grounded | `prompt_attack_strength`", report)
+            self.assertIn("| `INPUT-10` | grounded | `prompt_attack_strength` | vendor-grounded |", report)
+            self.assertIn("catalog-default (opinionated baseline, NOT vendor-backed)", report)
             yml = (Path(d) / "nemo-config.yml").read_text()
             self.assertIn('    flows:\n      - "jailbreak detection heuristics"', yml)
             policy["controls"][0]["tier"] = "vendor-backed"

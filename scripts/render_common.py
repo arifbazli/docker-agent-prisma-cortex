@@ -26,19 +26,32 @@ def norm_enum(value, allowed: dict):
 
 def report_md(target: str, policy: dict, mapped: list[dict], unsupported: list[dict], notes: list[str]) -> str:
     out = [f"# {target} rendering report - {policy['profile'].get('name', 'profile')}", "",
-           "> ADVISORY. Generated from policy.json by a script, without a model. Review before use.", "",
+           "> ADVISORY. Generated from policy.json by a script, without a model. Review before use.",
+           "> Values with basis catalog-default are an opinionated baseline, NOT vendor-backed.", "",
            "## Mapped to real target fields", ""]
     if mapped:
-        out += ["| Control | Tier | Parameter | Value | Target field |", "|---|---|---|---|---|"]
-        out += [f"| `{m['control_id']}` | {m['tier']} | `{m['parameter']}` | `{json.dumps(m['value'])}` | `{m['field']}` |" for m in mapped]
+        out += ["| Control | Tier | Parameter | Basis | Value | Target field |", "|---|---|---|---|---|---|"]
+        out += [f"| `{m['control_id']}` | {m['tier']} | `{m['parameter']}` | {basis_text(m['basis'])} | `{json.dumps(m['value'])}` | `{m['field']}` |"
+                for m in mapped]
     else:
         out.append("Nothing in this policy maps to a native field of the target.")
     out += ["", "## Not rendered (unsupported by the target or not grounded)", "",
-            "| Control | Tier | Parameter | Reason |", "|---|---|---|---|"]
-    out += [f"| `{u['control_id']}` | {u['tier']} | `{u['parameter']}` | {u['reason']} |" for u in unsupported] or ["| - | - | - | none |"]
+            "| Control | Tier | Parameter | Basis | Reason |", "|---|---|---|---|---|"]
+    out += [f"| `{u['control_id']}` | {u['tier']} | `{u['parameter']}` | {basis_text(u['basis'])} | {u['reason']} |"
+            for u in unsupported] or ["| - | - | - | - | none |"]
     if notes:
         out += ["", "## Notes", "", *[f"- {n}" for n in notes]]
     return "\n".join(out) + "\n"
+
+
+def basis_text(basis: str) -> str:
+    return {"vendor-grounded": "vendor-grounded",
+            "catalog-default": "catalog-default (opinionated baseline, NOT vendor-backed)"}.get(basis, basis)
+
+
+def mapped_row(c: dict, p: dict, field: str, value=None) -> dict:
+    return {"control_id": c["control_id"], "tier": c["tier"], "parameter": p["name"], "basis": p["basis"],
+            "value": p["value"] if value is None else value, "field": field}
 
 
 def walk(policy: dict):
@@ -52,4 +65,5 @@ def walk(policy: dict):
 
 def unsupported_row(c: dict, p, reason: str) -> dict:
     return {"control_id": c["control_id"], "tier": c["tier"], "parameter": p["name"] if p else "-",
-            "reason": reason if p else "catalog-default control: no grounded parameters, NOT vendor-backed"}
+            "basis": p["basis"] if p else "-",
+            "reason": reason if p else "no parameters at all (no vendor value and no catalog default): configure by hand"}

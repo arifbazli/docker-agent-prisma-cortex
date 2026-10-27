@@ -18,14 +18,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: cloud-only models (no model downloads anywhere)
+        run: |
+          if git grep -n -i "ollama pull" -- . ':!.github/workflows/ci.yml'; then
+            echo "::error::'ollama pull' found: this repository uses Ollama cloud models only"; exit 1
+          fi
       - name: shellcheck
-        run: shellcheck -x scripts/*.sh bench/*.sh
+        run: shellcheck -x scripts/*.sh bench/*.sh bench/guardrail/*.sh
       - name: yamllint
         run: pip install --quiet yamllint && yamllint -s agents/ compose.yaml .github/
       - name: generated configs are up to date
         run: python3 scripts/gen-configs.py --check
-      - name: unit tests
+      - name: unit tests (incl. model guard; no model calls)
         run: python3 -m unittest discover -s tests -v
+      - name: guardrail golden profiles + mutation checks (no model calls)
+        run: bench/guardrail/check-golden.sh
       - name: install docker-agent
         run: |
           curl -fsSL -o /usr/local/bin/docker-agent \

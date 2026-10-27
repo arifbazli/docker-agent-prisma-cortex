@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import jsonschema_lite as V  # noqa: E402
+import guardrail_values as GV  # noqa: E402
 
 CATALOG = ROOT / "seeds" / "guardrail-catalog.json"
 PROFILE_SCHEMA = ROOT / "schemas" / "app-profile.schema.json"
@@ -89,8 +90,8 @@ def applies(rule: dict, profile: dict) -> tuple[bool, str]:
 
 def control_line(c: dict) -> str:
     """One control as the specialists receive it."""
-    return (f"{c['id']} | {c['category']} | {c['name']} | {c['description']} | "
-            f"keys: {', '.join(c['allowed_parameter_keys'])}")
+    keys = ", ".join(f"{k} ({GV.type_label(c['value_types'][k])})" for k in c["allowed_parameter_keys"])
+    return f"{c['id']} | {c['category']} | {c['name']} | {c['description']} | keys: {keys}"
 
 
 def select(profile: dict, catalog: dict) -> dict:

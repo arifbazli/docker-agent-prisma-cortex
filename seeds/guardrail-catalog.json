@@ -1,6 +1,6 @@
 {
   "catalog_version": "1.0",
-  "$comment": "Curated data, not model output. Threat ids: OWASP Top 10 for LLM Applications 2025 and MITRE ATLAS (atlas-data v5.6.0). supported_targets lists where a control maps to a built-in feature: bedrock = Amazon Bedrock Guardrails, nemo = NVIDIA NeMo Guardrails; generic = implement in your own gateway or app. applies_when: match all with no conditions means always. allowed_parameter_keys: the only parameter names a specialist may propose for a control.",
+  "$comment": "Curated data, not model output. Threat ids: OWASP Top 10 for LLM Applications 2025 and MITRE ATLAS (atlas-data v5.6.0). supported_targets lists where a control maps to a built-in feature: bedrock = Amazon Bedrock Guardrails, nemo = NVIDIA NeMo Guardrails; generic = implement in your own gateway or app. applies_when: match all with no conditions means always. allowed_parameter_keys: the only parameter names a specialist may propose for a control. value_types: the type, range or options each key's value must have; quote_terms: word groups that must all appear (any word per group) in the quote of a number value. recommended_defaults: an opinionated, conservative baseline, NOT vendor-backed.",
   "categories": [
     {
       "id": "input",
@@ -316,7 +316,36 @@
         "max_input_chars",
         "allowed_encodings",
         "reject_on_invalid"
-      ]
+      ],
+      "value_types": {
+        "max_input_chars": {
+          "type": "number",
+          "min": 1,
+          "max": 10000000,
+          "quote_terms": [
+            [
+              "character",
+              "char"
+            ],
+            [
+              "input",
+              "prompt",
+              "request",
+              "text"
+            ]
+          ]
+        },
+        "allowed_encodings": {
+          "type": "list"
+        },
+        "reject_on_invalid": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "reject_on_invalid": true,
+        "max_input_chars": 10000
+      }
     },
     {
       "id": "INPUT-02",
@@ -355,7 +384,31 @@
         "allowed_file_types",
         "scan_before_parse",
         "max_file_size_mb"
-      ]
+      ],
+      "value_types": {
+        "allowed_file_types": {
+          "type": "list"
+        },
+        "scan_before_parse": {
+          "type": "boolean"
+        },
+        "max_file_size_mb": {
+          "type": "number",
+          "min": 0.001,
+          "max": 10000,
+          "quote_terms": [
+            [
+              "mb",
+              "size",
+              "file"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "scan_before_parse": true,
+        "max_file_size_mb": 10
+      }
     },
     {
       "id": "INPUT-03",
@@ -389,7 +442,19 @@
       "allowed_parameter_keys": [
         "schema_validation",
         "reject_on_invalid"
-      ]
+      ],
+      "value_types": {
+        "schema_validation": {
+          "type": "boolean"
+        },
+        "reject_on_invalid": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "schema_validation": true,
+        "reject_on_invalid": true
+      }
     },
     {
       "id": "INPUT-04",
@@ -414,7 +479,22 @@
         "strip_markup",
         "strip_control_characters",
         "input_tagging"
-      ]
+      ],
+      "value_types": {
+        "strip_markup": {
+          "type": "boolean"
+        },
+        "strip_control_characters": {
+          "type": "boolean"
+        },
+        "input_tagging": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "strip_markup": true,
+        "strip_control_characters": true
+      }
     },
     {
       "id": "INPUT-05",
@@ -452,7 +532,18 @@
       "allowed_parameter_keys": [
         "allowed_mime_types",
         "verify_content_type"
-      ]
+      ],
+      "value_types": {
+        "allowed_mime_types": {
+          "type": "list"
+        },
+        "verify_content_type": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "verify_content_type": true
+      }
     },
     {
       "id": "INPUT-06",
@@ -490,7 +581,19 @@
       "allowed_parameter_keys": [
         "malware_scan",
         "block_unscannable"
-      ]
+      ],
+      "value_types": {
+        "malware_scan": {
+          "type": "boolean"
+        },
+        "block_unscannable": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "malware_scan": true,
+        "block_unscannable": true
+      }
     },
     {
       "id": "INPUT-07",
@@ -515,7 +618,58 @@
         "max_input_chars",
         "max_input_tokens",
         "max_file_size_mb"
-      ]
+      ],
+      "value_types": {
+        "max_input_chars": {
+          "type": "number",
+          "min": 1,
+          "max": 10000000,
+          "quote_terms": [
+            [
+              "character",
+              "char"
+            ],
+            [
+              "input",
+              "prompt",
+              "request",
+              "text"
+            ]
+          ]
+        },
+        "max_input_tokens": {
+          "type": "number",
+          "min": 1,
+          "max": 10000000,
+          "quote_terms": [
+            [
+              "token"
+            ],
+            [
+              "input",
+              "prompt",
+              "request",
+              "context"
+            ]
+          ]
+        },
+        "max_file_size_mb": {
+          "type": "number",
+          "min": 0.001,
+          "max": 10000,
+          "quote_terms": [
+            [
+              "mb",
+              "size",
+              "file"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "max_input_chars": 10000,
+        "max_file_size_mb": 10
+      }
     },
     {
       "id": "INPUT-08",
@@ -551,7 +705,54 @@
         "requests_per_minute",
         "requests_per_day",
         "rate_limit_scope"
-      ]
+      ],
+      "value_types": {
+        "requests_per_minute": {
+          "type": "number",
+          "min": 1,
+          "max": 10000000,
+          "quote_terms": [
+            [
+              "request",
+              "call",
+              "rpm"
+            ],
+            [
+              "minute",
+              "rpm"
+            ]
+          ]
+        },
+        "requests_per_day": {
+          "type": "number",
+          "min": 1,
+          "max": 100000000,
+          "quote_terms": [
+            [
+              "request",
+              "call"
+            ],
+            [
+              "day",
+              "daily"
+            ]
+          ]
+        },
+        "rate_limit_scope": {
+          "type": "enum",
+          "enum": [
+            "user",
+            "api_key",
+            "ip",
+            "tenant",
+            "global"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "requests_per_minute": 30,
+        "rate_limit_scope": "user"
+      }
     },
     {
       "id": "INPUT-09",
@@ -581,7 +782,24 @@
       "allowed_parameter_keys": [
         "allowed_languages",
         "unsupported_language_action"
-      ]
+      ],
+      "value_types": {
+        "allowed_languages": {
+          "type": "list"
+        },
+        "unsupported_language_action": {
+          "type": "enum",
+          "enum": [
+            "block",
+            "translate",
+            "route_to_human",
+            "allow"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "unsupported_language_action": "route_to_human"
+      }
     },
     {
       "id": "INPUT-10",
@@ -611,7 +829,49 @@
         "self_check_input",
         "content_safety_input",
         "input_tagging"
-      ]
+      ],
+      "value_types": {
+        "prompt_attack_strength": {
+          "type": "enum",
+          "enum": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "injection_detection_types": {
+          "type": "list",
+          "items_enum": [
+            "sqli",
+            "template",
+            "code",
+            "xss"
+          ]
+        },
+        "injection_action": {
+          "type": "enum",
+          "enum": [
+            "reject",
+            "omit",
+            "sanitize",
+            "block"
+          ]
+        },
+        "self_check_input": {
+          "type": "boolean"
+        },
+        "content_safety_input": {
+          "type": "boolean"
+        },
+        "input_tagging": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "prompt_attack_strength": "HIGH",
+        "injection_action": "reject"
+      }
     },
     {
       "id": "PROMPT-01",
@@ -636,7 +896,19 @@
       "allowed_parameter_keys": [
         "input_tagging",
         "separate_system_channel"
-      ]
+      ],
+      "value_types": {
+        "input_tagging": {
+          "type": "boolean"
+        },
+        "separate_system_channel": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "separate_system_channel": true,
+        "input_tagging": true
+      }
     },
     {
       "id": "PROMPT-02",
@@ -678,7 +950,33 @@
         "prompt_attack_strength",
         "self_check_input",
         "injection_detection_types"
-      ]
+      ],
+      "value_types": {
+        "prompt_attack_strength": {
+          "type": "enum",
+          "enum": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "self_check_input": {
+          "type": "boolean"
+        },
+        "injection_detection_types": {
+          "type": "list",
+          "items_enum": [
+            "sqli",
+            "template",
+            "code",
+            "xss"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "prompt_attack_strength": "HIGH"
+      }
     },
     {
       "id": "PROMPT-03",
@@ -702,7 +1000,18 @@
       "allowed_parameter_keys": [
         "input_tagging",
         "role_labels"
-      ]
+      ],
+      "value_types": {
+        "input_tagging": {
+          "type": "boolean"
+        },
+        "role_labels": {
+          "type": "list"
+        }
+      },
+      "recommended_defaults": {
+        "input_tagging": true
+      }
     },
     {
       "id": "PROMPT-04",
@@ -741,7 +1050,19 @@
       "allowed_parameter_keys": [
         "input_tagging",
         "untrusted_content_delimiters"
-      ]
+      ],
+      "value_types": {
+        "input_tagging": {
+          "type": "boolean"
+        },
+        "untrusted_content_delimiters": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "input_tagging": true,
+        "untrusted_content_delimiters": true
+      }
     },
     {
       "id": "PROMPT-05",
@@ -765,7 +1086,19 @@
       "allowed_parameter_keys": [
         "template_versioning",
         "template_review_required"
-      ]
+      ],
+      "value_types": {
+        "template_versioning": {
+          "type": "boolean"
+        },
+        "template_review_required": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "template_versioning": true,
+        "template_review_required": true
+      }
     },
     {
       "id": "PROMPT-06",
@@ -800,7 +1133,25 @@
       "allowed_parameter_keys": [
         "prompt_attack_strength",
         "input_tagging"
-      ]
+      ],
+      "value_types": {
+        "prompt_attack_strength": {
+          "type": "enum",
+          "enum": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "input_tagging": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "prompt_attack_strength": "HIGH",
+        "input_tagging": true
+      }
     },
     {
       "id": "PROMPT-07",
@@ -833,7 +1184,45 @@
         "jailbreak_heuristics",
         "length_per_perplexity_threshold",
         "prefix_suffix_perplexity_threshold"
-      ]
+      ],
+      "value_types": {
+        "prompt_attack_strength": {
+          "type": "enum",
+          "enum": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "jailbreak_heuristics": {
+          "type": "boolean"
+        },
+        "length_per_perplexity_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 100000,
+          "quote_terms": [
+            [
+              "perplexity"
+            ]
+          ]
+        },
+        "prefix_suffix_perplexity_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 100000,
+          "quote_terms": [
+            [
+              "perplexity"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "prompt_attack_strength": "HIGH",
+        "jailbreak_heuristics": true
+      }
     },
     {
       "id": "PROMPT-08",
@@ -863,7 +1252,23 @@
       "allowed_parameter_keys": [
         "rewrite_action",
         "self_check_input"
-      ]
+      ],
+      "value_types": {
+        "rewrite_action": {
+          "type": "enum",
+          "enum": [
+            "truncate",
+            "sanitize",
+            "rephrase"
+          ]
+        },
+        "self_check_input": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "self_check_input": true
+      }
     },
     {
       "id": "PROMPT-09",
@@ -905,7 +1310,40 @@
         "injection_detection_types",
         "injection_action",
         "prompt_attack_strength"
-      ]
+      ],
+      "value_types": {
+        "injection_detection_types": {
+          "type": "list",
+          "items_enum": [
+            "sqli",
+            "template",
+            "code",
+            "xss"
+          ]
+        },
+        "injection_action": {
+          "type": "enum",
+          "enum": [
+            "reject",
+            "omit",
+            "sanitize",
+            "block"
+          ]
+        },
+        "prompt_attack_strength": {
+          "type": "enum",
+          "enum": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "prompt_attack_strength": "HIGH",
+        "injection_action": "reject"
+      }
     },
     {
       "id": "PROMPT-10",
@@ -942,7 +1380,28 @@
         "prompt_attack_strength",
         "self_check_output",
         "blocked_words"
-      ]
+      ],
+      "value_types": {
+        "prompt_attack_strength": {
+          "type": "enum",
+          "enum": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "self_check_output": {
+          "type": "boolean"
+        },
+        "blocked_words": {
+          "type": "list"
+        }
+      },
+      "recommended_defaults": {
+        "prompt_attack_strength": "HIGH",
+        "self_check_output": true
+      }
     },
     {
       "id": "RETRIEVAL-01",
@@ -972,7 +1431,16 @@
       "allowed_parameter_keys": [
         "allowed_sources",
         "metadata_filters"
-      ]
+      ],
+      "value_types": {
+        "allowed_sources": {
+          "type": "list"
+        },
+        "metadata_filters": {
+          "type": "list"
+        }
+      },
+      "recommended_defaults": {}
     },
     {
       "id": "RETRIEVAL-02",
@@ -999,7 +1467,24 @@
       "default_severity": "low",
       "allowed_parameter_keys": [
         "max_document_age_days"
-      ]
+      ],
+      "value_types": {
+        "max_document_age_days": {
+          "type": "number",
+          "min": 1,
+          "max": 3650,
+          "quote_terms": [
+            [
+              "day",
+              "age",
+              "fresh"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "max_document_age_days": 365
+      }
     },
     {
       "id": "RETRIEVAL-03",
@@ -1028,7 +1513,23 @@
       "default_severity": "medium",
       "allowed_parameter_keys": [
         "min_trust_score"
-      ]
+      ],
+      "value_types": {
+        "min_trust_score": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "quote_terms": [
+            [
+              "trust",
+              "score"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "min_trust_score": 0.5
+      }
     },
     {
       "id": "RETRIEVAL-04",
@@ -1060,7 +1561,27 @@
         "mask_sensitive_data_on_retrieval",
         "pii_entities",
         "injection_detection_types"
-      ]
+      ],
+      "value_types": {
+        "mask_sensitive_data_on_retrieval": {
+          "type": "boolean"
+        },
+        "pii_entities": {
+          "type": "list"
+        },
+        "injection_detection_types": {
+          "type": "list",
+          "items_enum": [
+            "sqli",
+            "template",
+            "code",
+            "xss"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "mask_sensitive_data_on_retrieval": true
+      }
     },
     {
       "id": "RETRIEVAL-05",
@@ -1090,7 +1611,18 @@
       "allowed_parameter_keys": [
         "metadata_filters",
         "enforce_user_permissions"
-      ]
+      ],
+      "value_types": {
+        "metadata_filters": {
+          "type": "list"
+        },
+        "enforce_user_permissions": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "enforce_user_permissions": true
+      }
     },
     {
       "id": "RETRIEVAL-06",
@@ -1118,7 +1650,24 @@
       "default_severity": "low",
       "allowed_parameter_keys": [
         "dedup_similarity_threshold"
-      ]
+      ],
+      "value_types": {
+        "dedup_similarity_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "quote_terms": [
+            [
+              "similar",
+              "duplicate",
+              "threshold"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "dedup_similarity_threshold": 0.95
+      }
     },
     {
       "id": "RETRIEVAL-07",
@@ -1146,7 +1695,36 @@
       "allowed_parameter_keys": [
         "rerank_top_k",
         "rerank_min_score"
-      ]
+      ],
+      "value_types": {
+        "rerank_top_k": {
+          "type": "number",
+          "min": 1,
+          "max": 1000,
+          "quote_terms": [
+            [
+              "top",
+              "rerank",
+              "re-rank"
+            ]
+          ]
+        },
+        "rerank_min_score": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "quote_terms": [
+            [
+              "rerank",
+              "re-rank",
+              "score"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "rerank_top_k": 5
+      }
     },
     {
       "id": "RETRIEVAL-08",
@@ -1179,7 +1757,42 @@
         "relevance_threshold",
         "fact_checking",
         "refuse_without_context"
-      ]
+      ],
+      "value_types": {
+        "grounding_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 0.99,
+          "quote_terms": [
+            [
+              "grounding",
+              "threshold"
+            ]
+          ]
+        },
+        "relevance_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 0.99,
+          "quote_terms": [
+            [
+              "relevance",
+              "threshold"
+            ]
+          ]
+        },
+        "fact_checking": {
+          "type": "boolean"
+        },
+        "refuse_without_context": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "grounding_threshold": 0.7,
+        "relevance_threshold": 0.7,
+        "refuse_without_context": true
+      }
     },
     {
       "id": "RETRIEVAL-09",
@@ -1208,7 +1821,16 @@
       "allowed_parameter_keys": [
         "allowed_sources",
         "allowed_domains"
-      ]
+      ],
+      "value_types": {
+        "allowed_sources": {
+          "type": "list"
+        },
+        "allowed_domains": {
+          "type": "list"
+        }
+      },
+      "recommended_defaults": {}
     },
     {
       "id": "RETRIEVAL-10",
@@ -1237,7 +1859,28 @@
       "allowed_parameter_keys": [
         "require_citations",
         "min_citations"
-      ]
+      ],
+      "value_types": {
+        "require_citations": {
+          "type": "boolean"
+        },
+        "min_citations": {
+          "type": "number",
+          "min": 0,
+          "max": 100,
+          "quote_terms": [
+            [
+              "citation",
+              "cite",
+              "source"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "require_citations": true,
+        "min_citations": 1
+      }
     },
     {
       "id": "TOOL-01",
@@ -1267,7 +1910,18 @@
       "allowed_parameter_keys": [
         "allowed_tools",
         "deny_unlisted_tools"
-      ]
+      ],
+      "value_types": {
+        "allowed_tools": {
+          "type": "list"
+        },
+        "deny_unlisted_tools": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "deny_unlisted_tools": true
+      }
     },
     {
       "id": "TOOL-02",
@@ -1304,7 +1958,23 @@
       "allowed_parameter_keys": [
         "approval_required_actions",
         "approval_policy"
-      ]
+      ],
+      "value_types": {
+        "approval_required_actions": {
+          "type": "list"
+        },
+        "approval_policy": {
+          "type": "enum",
+          "enum": [
+            "always",
+            "state_changing",
+            "high_impact"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "approval_policy": "state_changing"
+      }
     },
     {
       "id": "TOOL-03",
@@ -1334,7 +2004,18 @@
       "allowed_parameter_keys": [
         "enforce_user_permissions",
         "permission_source"
-      ]
+      ],
+      "value_types": {
+        "enforce_user_permissions": {
+          "type": "boolean"
+        },
+        "permission_source": {
+          "type": "string"
+        }
+      },
+      "recommended_defaults": {
+        "enforce_user_permissions": true
+      }
     },
     {
       "id": "TOOL-04",
@@ -1364,7 +2045,28 @@
       "allowed_parameter_keys": [
         "credential_ttl_minutes",
         "least_privilege_scopes"
-      ]
+      ],
+      "value_types": {
+        "credential_ttl_minutes": {
+          "type": "number",
+          "min": 1,
+          "max": 1440,
+          "quote_terms": [
+            [
+              "minute",
+              "ttl",
+              "expir",
+              "lifetime"
+            ]
+          ]
+        },
+        "least_privilege_scopes": {
+          "type": "list"
+        }
+      },
+      "recommended_defaults": {
+        "credential_ttl_minutes": 15
+      }
     },
     {
       "id": "TOOL-05",
@@ -1406,7 +2108,39 @@
         "max_transaction_amount",
         "max_transactions_per_day",
         "currency"
-      ]
+      ],
+      "value_types": {
+        "max_transaction_amount": {
+          "type": "number",
+          "min": 0,
+          "max": 1000000000,
+          "quote_terms": [
+            [
+              "amount",
+              "transaction",
+              "limit"
+            ]
+          ]
+        },
+        "max_transactions_per_day": {
+          "type": "number",
+          "min": 0,
+          "max": 1000000,
+          "quote_terms": [
+            [
+              "transaction",
+              "per day",
+              "daily"
+            ]
+          ]
+        },
+        "currency": {
+          "type": "string"
+        }
+      },
+      "recommended_defaults": {
+        "max_transactions_per_day": 10
+      }
     },
     {
       "id": "TOOL-06",
@@ -1448,7 +2182,39 @@
         "sandbox_type",
         "network_egress",
         "filesystem_access"
-      ]
+      ],
+      "value_types": {
+        "sandbox_type": {
+          "type": "enum",
+          "enum": [
+            "container",
+            "microvm",
+            "wasm",
+            "none"
+          ]
+        },
+        "network_egress": {
+          "type": "enum",
+          "enum": [
+            "none",
+            "allowlist",
+            "any"
+          ]
+        },
+        "filesystem_access": {
+          "type": "enum",
+          "enum": [
+            "none",
+            "read_only",
+            "read_write"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "sandbox_type": "container",
+        "network_egress": "allowlist",
+        "filesystem_access": "read_only"
+      }
     },
     {
       "id": "TOOL-07",
@@ -1479,7 +2245,32 @@
         "log_tool_inputs",
         "log_tool_outputs",
         "log_retention_days"
-      ]
+      ],
+      "value_types": {
+        "log_tool_inputs": {
+          "type": "boolean"
+        },
+        "log_tool_outputs": {
+          "type": "boolean"
+        },
+        "log_retention_days": {
+          "type": "number",
+          "min": 1,
+          "max": 3650,
+          "quote_terms": [
+            [
+              "day",
+              "retention",
+              "retain"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "log_tool_inputs": true,
+        "log_tool_outputs": true,
+        "log_retention_days": 90
+      }
     },
     {
       "id": "TOOL-08",
@@ -1508,7 +2299,35 @@
       "allowed_parameter_keys": [
         "tool_timeout_seconds",
         "task_timeout_seconds"
-      ]
+      ],
+      "value_types": {
+        "tool_timeout_seconds": {
+          "type": "number",
+          "min": 1,
+          "max": 3600,
+          "quote_terms": [
+            [
+              "second",
+              "timeout"
+            ]
+          ]
+        },
+        "task_timeout_seconds": {
+          "type": "number",
+          "min": 1,
+          "max": 86400,
+          "quote_terms": [
+            [
+              "second",
+              "timeout"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "tool_timeout_seconds": 30,
+        "task_timeout_seconds": 300
+      }
     },
     {
       "id": "TOOL-09",
@@ -1537,7 +2356,36 @@
       "allowed_parameter_keys": [
         "max_retries",
         "backoff_seconds"
-      ]
+      ],
+      "value_types": {
+        "max_retries": {
+          "type": "number",
+          "min": 0,
+          "max": 100,
+          "quote_terms": [
+            [
+              "retr",
+              "attempt"
+            ]
+          ]
+        },
+        "backoff_seconds": {
+          "type": "number",
+          "min": 0,
+          "max": 600,
+          "quote_terms": [
+            [
+              "second",
+              "backoff",
+              "delay"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "max_retries": 2,
+        "backoff_seconds": 2
+      }
     },
     {
       "id": "TOOL-10",
@@ -1574,7 +2422,26 @@
       "allowed_parameter_keys": [
         "confirmation_required_actions",
         "confirmation_timeout_minutes"
-      ]
+      ],
+      "value_types": {
+        "confirmation_required_actions": {
+          "type": "list"
+        },
+        "confirmation_timeout_minutes": {
+          "type": "number",
+          "min": 1,
+          "max": 1440,
+          "quote_terms": [
+            [
+              "minute",
+              "timeout"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "confirmation_timeout_minutes": 15
+      }
     },
     {
       "id": "OUTPUT-01",
@@ -1607,7 +2474,44 @@
         "content_filter_categories",
         "content_safety_output",
         "self_check_output"
-      ]
+      ],
+      "value_types": {
+        "content_filter_strength": {
+          "type": "enum",
+          "enum": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "content_filter_categories": {
+          "type": "list",
+          "items_enum": [
+            "SEXUAL",
+            "VIOLENCE",
+            "HATE",
+            "INSULTS",
+            "MISCONDUCT"
+          ]
+        },
+        "content_safety_output": {
+          "type": "boolean"
+        },
+        "self_check_output": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "content_filter_strength": "HIGH",
+        "content_filter_categories": [
+          "SEXUAL",
+          "VIOLENCE",
+          "HATE",
+          "INSULTS",
+          "MISCONDUCT"
+        ]
+      }
     },
     {
       "id": "OUTPUT-02",
@@ -1640,7 +2544,42 @@
         "content_filter_categories",
         "profanity_filter",
         "content_safety_output"
-      ]
+      ],
+      "value_types": {
+        "content_filter_strength": {
+          "type": "enum",
+          "enum": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "content_filter_categories": {
+          "type": "list",
+          "items_enum": [
+            "SEXUAL",
+            "VIOLENCE",
+            "HATE",
+            "INSULTS",
+            "MISCONDUCT"
+          ]
+        },
+        "profanity_filter": {
+          "type": "boolean"
+        },
+        "content_safety_output": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "content_filter_strength": "HIGH",
+        "content_filter_categories": [
+          "HATE",
+          "INSULTS"
+        ],
+        "profanity_filter": true
+      }
     },
     {
       "id": "OUTPUT-03",
@@ -1684,7 +2623,42 @@
         "pii_score_threshold",
         "mask_sensitive_data_on_input",
         "mask_sensitive_data_on_output"
-      ]
+      ],
+      "value_types": {
+        "pii_entities": {
+          "type": "list"
+        },
+        "pii_action": {
+          "type": "enum",
+          "enum": [
+            "BLOCK",
+            "ANONYMIZE",
+            "MASK",
+            "NONE"
+          ]
+        },
+        "pii_score_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "quote_terms": [
+            [
+              "score",
+              "threshold"
+            ]
+          ]
+        },
+        "mask_sensitive_data_on_input": {
+          "type": "boolean"
+        },
+        "mask_sensitive_data_on_output": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "pii_action": "ANONYMIZE",
+        "mask_sensitive_data_on_output": true
+      }
     },
     {
       "id": "OUTPUT-04",
@@ -1708,7 +2682,18 @@
       "allowed_parameter_keys": [
         "blocked_words",
         "profanity_filter"
-      ]
+      ],
+      "value_types": {
+        "blocked_words": {
+          "type": "list"
+        },
+        "profanity_filter": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "profanity_filter": true
+      }
     },
     {
       "id": "OUTPUT-05",
@@ -1735,7 +2720,41 @@
         "relevance_threshold",
         "hallucination_check",
         "fact_checking"
-      ]
+      ],
+      "value_types": {
+        "grounding_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 0.99,
+          "quote_terms": [
+            [
+              "grounding",
+              "threshold"
+            ]
+          ]
+        },
+        "relevance_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 0.99,
+          "quote_terms": [
+            [
+              "relevance",
+              "threshold"
+            ]
+          ]
+        },
+        "hallucination_check": {
+          "type": "boolean"
+        },
+        "fact_checking": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "grounding_threshold": 0.7,
+        "relevance_threshold": 0.7
+      }
     },
     {
       "id": "OUTPUT-06",
@@ -1763,7 +2782,18 @@
       "allowed_parameter_keys": [
         "require_citations",
         "verify_citation_support"
-      ]
+      ],
+      "value_types": {
+        "require_citations": {
+          "type": "boolean"
+        },
+        "verify_citation_support": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "verify_citation_support": true
+      }
     },
     {
       "id": "OUTPUT-07",
@@ -1804,7 +2834,18 @@
       "allowed_parameter_keys": [
         "disclaimer_text",
         "disclaimer_topics"
-      ]
+      ],
+      "value_types": {
+        "disclaimer_text": {
+          "type": "string"
+        },
+        "disclaimer_topics": {
+          "type": "list"
+        }
+      },
+      "recommended_defaults": {
+        "disclaimer_text": "This answer is generated by AI and may be incomplete or wrong."
+      }
     },
     {
       "id": "OUTPUT-08",
@@ -1835,7 +2876,22 @@
       "allowed_parameter_keys": [
         "denied_topics",
         "topic_action"
-      ]
+      ],
+      "value_types": {
+        "denied_topics": {
+          "type": "list"
+        },
+        "topic_action": {
+          "type": "enum",
+          "enum": [
+            "BLOCK",
+            "NONE"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "topic_action": "BLOCK"
+      }
     },
     {
       "id": "OUTPUT-09",
@@ -1869,7 +2925,31 @@
       "allowed_parameter_keys": [
         "output_schema_validation",
         "max_output_tokens"
-      ]
+      ],
+      "value_types": {
+        "output_schema_validation": {
+          "type": "boolean"
+        },
+        "max_output_tokens": {
+          "type": "number",
+          "min": 1,
+          "max": 10000000,
+          "quote_terms": [
+            [
+              "token"
+            ],
+            [
+              "output",
+              "response",
+              "completion",
+              "generat"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "output_schema_validation": true
+      }
     },
     {
       "id": "OUTPUT-10",
@@ -1893,7 +2973,22 @@
         "escape_html",
         "block_external_links",
         "self_check_output"
-      ]
+      ],
+      "value_types": {
+        "escape_html": {
+          "type": "boolean"
+        },
+        "block_external_links": {
+          "type": "boolean"
+        },
+        "self_check_output": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "escape_html": true,
+        "block_external_links": true
+      }
     },
     {
       "id": "RUNTIME-01",
@@ -1922,7 +3017,27 @@
       "allowed_parameter_keys": [
         "log_guardrail_events",
         "session_alert_threshold"
-      ]
+      ],
+      "value_types": {
+        "log_guardrail_events": {
+          "type": "boolean"
+        },
+        "session_alert_threshold": {
+          "type": "number",
+          "min": 1,
+          "max": 10000,
+          "quote_terms": [
+            [
+              "alert",
+              "threshold",
+              "violation"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "log_guardrail_events": true
+      }
     },
     {
       "id": "RUNTIME-02",
@@ -1946,7 +3061,37 @@
       "allowed_parameter_keys": [
         "block_rate_alert_threshold",
         "anomaly_window_minutes"
-      ]
+      ],
+      "value_types": {
+        "block_rate_alert_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "quote_terms": [
+            [
+              "block",
+              "rate",
+              "threshold"
+            ]
+          ]
+        },
+        "anomaly_window_minutes": {
+          "type": "number",
+          "min": 1,
+          "max": 10080,
+          "quote_terms": [
+            [
+              "minute",
+              "window",
+              "hour"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "block_rate_alert_threshold": 0.2,
+        "anomaly_window_minutes": 60
+      }
     },
     {
       "id": "RUNTIME-03",
@@ -1968,7 +3113,37 @@
       "allowed_parameter_keys": [
         "latency_slo_ms",
         "guardrail_latency_budget_ms"
-      ]
+      ],
+      "value_types": {
+        "latency_slo_ms": {
+          "type": "number",
+          "min": 1,
+          "max": 60000,
+          "quote_terms": [
+            [
+              "latency",
+              "ms",
+              "millisecond"
+            ]
+          ]
+        },
+        "guardrail_latency_budget_ms": {
+          "type": "number",
+          "min": 1,
+          "max": 60000,
+          "quote_terms": [
+            [
+              "latency",
+              "ms",
+              "millisecond"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "latency_slo_ms": 3000,
+        "guardrail_latency_budget_ms": 500
+      }
     },
     {
       "id": "RUNTIME-04",
@@ -1993,7 +3168,59 @@
         "max_input_tokens",
         "max_output_tokens",
         "max_session_tokens"
-      ]
+      ],
+      "value_types": {
+        "max_input_tokens": {
+          "type": "number",
+          "min": 1,
+          "max": 10000000,
+          "quote_terms": [
+            [
+              "token"
+            ],
+            [
+              "input",
+              "prompt",
+              "request",
+              "context"
+            ]
+          ]
+        },
+        "max_output_tokens": {
+          "type": "number",
+          "min": 1,
+          "max": 10000000,
+          "quote_terms": [
+            [
+              "token"
+            ],
+            [
+              "output",
+              "response",
+              "completion",
+              "generat"
+            ]
+          ]
+        },
+        "max_session_tokens": {
+          "type": "number",
+          "min": 1,
+          "max": 100000000,
+          "quote_terms": [
+            [
+              "token"
+            ],
+            [
+              "session",
+              "conversation"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "max_input_tokens": 8000,
+        "max_output_tokens": 2000
+      }
     },
     {
       "id": "RUNTIME-05",
@@ -2017,7 +3244,50 @@
         "daily_budget_usd",
         "per_user_budget_usd",
         "budget_alert_percent"
-      ]
+      ],
+      "value_types": {
+        "daily_budget_usd": {
+          "type": "number",
+          "min": 0,
+          "max": 1000000,
+          "quote_terms": [
+            [
+              "budget",
+              "cost",
+              "spend",
+              "$"
+            ]
+          ]
+        },
+        "per_user_budget_usd": {
+          "type": "number",
+          "min": 0,
+          "max": 1000000,
+          "quote_terms": [
+            [
+              "budget",
+              "cost",
+              "spend",
+              "$"
+            ]
+          ]
+        },
+        "budget_alert_percent": {
+          "type": "number",
+          "min": 1,
+          "max": 100,
+          "quote_terms": [
+            [
+              "budget",
+              "percent",
+              "%"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "budget_alert_percent": 80
+      }
     },
     {
       "id": "RUNTIME-06",
@@ -2047,7 +3317,37 @@
       "allowed_parameter_keys": [
         "max_agent_steps",
         "max_repeated_actions"
-      ]
+      ],
+      "value_types": {
+        "max_agent_steps": {
+          "type": "number",
+          "min": 1,
+          "max": 1000,
+          "quote_terms": [
+            [
+              "step",
+              "iteration",
+              "loop"
+            ]
+          ]
+        },
+        "max_repeated_actions": {
+          "type": "number",
+          "min": 1,
+          "max": 1000,
+          "quote_terms": [
+            [
+              "repeat",
+              "same",
+              "loop"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "max_agent_steps": 20,
+        "max_repeated_actions": 3
+      }
     },
     {
       "id": "RUNTIME-07",
@@ -2070,7 +3370,24 @@
       "allowed_parameter_keys": [
         "fail_closed",
         "guardrail_error_action"
-      ]
+      ],
+      "value_types": {
+        "fail_closed": {
+          "type": "boolean"
+        },
+        "guardrail_error_action": {
+          "type": "enum",
+          "enum": [
+            "block",
+            "allow",
+            "fallback"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "fail_closed": true,
+        "guardrail_error_action": "block"
+      }
     },
     {
       "id": "RUNTIME-08",
@@ -2108,7 +3425,18 @@
       "allowed_parameter_keys": [
         "fallback_response",
         "fallback_to_human"
-      ]
+      ],
+      "value_types": {
+        "fallback_response": {
+          "type": "string"
+        },
+        "fallback_to_human": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "fallback_to_human": true
+      }
     },
     {
       "id": "RUNTIME-09",
@@ -2142,7 +3470,34 @@
       "allowed_parameter_keys": [
         "max_concurrent_requests_per_user",
         "max_concurrent_agent_runs"
-      ]
+      ],
+      "value_types": {
+        "max_concurrent_requests_per_user": {
+          "type": "number",
+          "min": 1,
+          "max": 10000,
+          "quote_terms": [
+            [
+              "concurren",
+              "parallel"
+            ]
+          ]
+        },
+        "max_concurrent_agent_runs": {
+          "type": "number",
+          "min": 1,
+          "max": 10000,
+          "quote_terms": [
+            [
+              "concurren",
+              "parallel"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "max_concurrent_requests_per_user": 3
+      }
     },
     {
       "id": "RUNTIME-10",
@@ -2173,7 +3528,45 @@
         "violation_threshold",
         "violation_window_minutes",
         "abuse_action"
-      ]
+      ],
+      "value_types": {
+        "violation_threshold": {
+          "type": "number",
+          "min": 1,
+          "max": 10000,
+          "quote_terms": [
+            [
+              "violation",
+              "threshold"
+            ]
+          ]
+        },
+        "violation_window_minutes": {
+          "type": "number",
+          "min": 1,
+          "max": 10080,
+          "quote_terms": [
+            [
+              "minute",
+              "window"
+            ]
+          ]
+        },
+        "abuse_action": {
+          "type": "enum",
+          "enum": [
+            "warn",
+            "throttle",
+            "suspend",
+            "block"
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "violation_threshold": 5,
+        "violation_window_minutes": 60,
+        "abuse_action": "throttle"
+      }
     },
     {
       "id": "MEMORY-01",
@@ -2202,7 +3595,27 @@
       "allowed_parameter_keys": [
         "retention_days",
         "allowed_memory_types"
-      ]
+      ],
+      "value_types": {
+        "retention_days": {
+          "type": "number",
+          "min": 1,
+          "max": 3650,
+          "quote_terms": [
+            [
+              "day",
+              "retention",
+              "retain"
+            ]
+          ]
+        },
+        "allowed_memory_types": {
+          "type": "list"
+        }
+      },
+      "recommended_defaults": {
+        "retention_days": 30
+      }
     },
     {
       "id": "MEMORY-02",
@@ -2230,7 +3643,24 @@
       "default_severity": "medium",
       "allowed_parameter_keys": [
         "memory_ttl_days"
-      ]
+      ],
+      "value_types": {
+        "memory_ttl_days": {
+          "type": "number",
+          "min": 1,
+          "max": 3650,
+          "quote_terms": [
+            [
+              "day",
+              "ttl",
+              "expir"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "memory_ttl_days": 30
+      }
     },
     {
       "id": "MEMORY-03",
@@ -2259,7 +3689,33 @@
       "allowed_parameter_keys": [
         "injection_detection_types",
         "recall_min_relevance"
-      ]
+      ],
+      "value_types": {
+        "injection_detection_types": {
+          "type": "list",
+          "items_enum": [
+            "sqli",
+            "template",
+            "code",
+            "xss"
+          ]
+        },
+        "recall_min_relevance": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "quote_terms": [
+            [
+              "relevan",
+              "score",
+              "threshold"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "recall_min_relevance": 0.5
+      }
     },
     {
       "id": "MEMORY-04",
@@ -2289,7 +3745,28 @@
         "pii_entities",
         "pii_action",
         "block_secrets"
-      ]
+      ],
+      "value_types": {
+        "pii_entities": {
+          "type": "list"
+        },
+        "pii_action": {
+          "type": "enum",
+          "enum": [
+            "BLOCK",
+            "ANONYMIZE",
+            "MASK",
+            "NONE"
+          ]
+        },
+        "block_secrets": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "block_secrets": true,
+        "pii_action": "BLOCK"
+      }
     },
     {
       "id": "MEMORY-05",
@@ -2319,7 +3796,24 @@
       "allowed_parameter_keys": [
         "memory_scope",
         "tenant_isolation"
-      ]
+      ],
+      "value_types": {
+        "memory_scope": {
+          "type": "enum",
+          "enum": [
+            "session",
+            "user",
+            "tenant"
+          ]
+        },
+        "tenant_isolation": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "memory_scope": "user",
+        "tenant_isolation": true
+      }
     },
     {
       "id": "MEMORY-06",
@@ -2348,7 +3842,27 @@
       "allowed_parameter_keys": [
         "clear_on_session_end",
         "session_ttl_minutes"
-      ]
+      ],
+      "value_types": {
+        "clear_on_session_end": {
+          "type": "boolean"
+        },
+        "session_ttl_minutes": {
+          "type": "number",
+          "min": 1,
+          "max": 10080,
+          "quote_terms": [
+            [
+              "minute",
+              "session",
+              "ttl"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "clear_on_session_end": true
+      }
     },
     {
       "id": "MEMORY-07",
@@ -2377,7 +3891,18 @@
       "allowed_parameter_keys": [
         "validate_before_write",
         "write_allowed_sources"
-      ]
+      ],
+      "value_types": {
+        "validate_before_write": {
+          "type": "boolean"
+        },
+        "write_allowed_sources": {
+          "type": "list"
+        }
+      },
+      "recommended_defaults": {
+        "validate_before_write": true
+      }
     },
     {
       "id": "MEMORY-08",
@@ -2406,7 +3931,18 @@
       "allowed_parameter_keys": [
         "edit_allowed_roles",
         "edit_audit"
-      ]
+      ],
+      "value_types": {
+        "edit_allowed_roles": {
+          "type": "list"
+        },
+        "edit_audit": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "edit_audit": true
+      }
     },
     {
       "id": "MEMORY-09",
@@ -2434,7 +3970,27 @@
       "allowed_parameter_keys": [
         "deletion_sla_days",
         "user_deletion_requests"
-      ]
+      ],
+      "value_types": {
+        "deletion_sla_days": {
+          "type": "number",
+          "min": 1,
+          "max": 365,
+          "quote_terms": [
+            [
+              "day",
+              "delet"
+            ]
+          ]
+        },
+        "user_deletion_requests": {
+          "type": "boolean"
+        }
+      },
+      "recommended_defaults": {
+        "user_deletion_requests": true,
+        "deletion_sla_days": 30
+      }
     },
     {
       "id": "MEMORY-10",
@@ -2463,7 +4019,27 @@
       "allowed_parameter_keys": [
         "audit_events",
         "audit_retention_days"
-      ]
+      ],
+      "value_types": {
+        "audit_events": {
+          "type": "list"
+        },
+        "audit_retention_days": {
+          "type": "number",
+          "min": 1,
+          "max": 3650,
+          "quote_terms": [
+            [
+              "day",
+              "retention",
+              "retain"
+            ]
+          ]
+        }
+      },
+      "recommended_defaults": {
+        "audit_retention_days": 365
+      }
     }
   ]
 }

@@ -130,9 +130,8 @@
               "required": [
                 "name",
                 "value",
-                "rationale",
-                "source_url",
-                "source_quote"
+                "basis",
+                "rationale"
               ],
               "additionalProperties": false,
               "properties": {
@@ -154,15 +153,30 @@
                 },
                 "source_url": {
                   "type": "string",
-                  "pattern": "^https://[^?#]+$"
+                  "pattern": "^https://[^?#]+$",
+                  "description": "Required for basis vendor-grounded (checked by scripts/check-policy.py)."
                 },
                 "source_quote": {
                   "type": "string",
                   "minLength": 1
+                },
+                "basis": {
+                  "type": "string",
+                  "enum": [
+                    "vendor-grounded",
+                    "catalog-default"
+                  ]
+                },
+                "label": {
+                  "type": "string",
+                  "enum": [
+                    "opinionated baseline, not vendor-backed"
+                  ],
+                  "description": "Required for basis catalog-default (checked by scripts/check-policy.py)."
                 }
               }
             },
-            "description": "Only grounded parameters. Empty for catalog-default controls."
+            "description": "Vendor-grounded parameters plus catalog recommended defaults for keys without a vendor value."
           },
           "tier": {
             "type": "string",
@@ -170,7 +184,7 @@
               "grounded",
               "catalog-default"
             ],
-            "description": "grounded = at least one parameter whose quote was found on the cited page by script AND judged SUPPORTED; catalog-default = filled by script from the catalog, no vendor source, no parameters."
+            "description": "grounded = at least one parameter with basis vendor-grounded (quote found on the cited page by script AND judged SUPPORTED); catalog-default = every parameter comes from the catalog's recommended_defaults (opinionated baseline, NOT vendor-backed), or there are none."
           },
           "description": {
             "type": "string",

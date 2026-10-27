@@ -1,27 +1,38 @@
 #!/usr/bin/env python3
 """Guardrail policy generator, pipeline mode.
 
-usage: scripts/guardrail.py PROFILE.json [--dry-run] [--config agents/guardrail-policy-generator.yaml]
+usage: scripts/guardrail.py PROFILE.json [--dry-run | --no-llm] [--config agents/guardrail-policy-generator.yaml]
 
-  1. select-controls (script)      which catalog controls apply to the profile
-  2. specialists (LLM, fetch)      one per category WITH selected controls;
-                                   propose parameters + source quote, as JSON
-  3. quote check (script)          is each source_quote on the page it cites?
-  4. judge (LLM, no tools)         does the quote support the parameters?
-  5. policy (script)               policy.json with an evidence tier per control
-  6. assembler (LLM, no tools)     test cases; script fills any control without one
-  7. reviewer (LLM, no tools)      advisory findings
-  8. renderers (script)            Bedrock / NeMo drafts, unsupported items listed
+  1. validate + select-controls (script)  which catalog controls apply to the profile
+  2. start pages (script)                 fetched once, cached; excerpts per category
+  3. specialists (LLM, SPECIALIST_MODEL)  one per category WITH selected controls,
+                                          up to GUARDRAIL_PARALLEL (4, max 7) at once;
+                                          per control and key: value or null + quote
+  4. value types (script)                 catalog value_types; numbers must be in the
+                                          quote and the quote about the setting
+  5. quote check (script)                 is each quote on the page it cites?
+  6. judge (LLM, JUDGE_MODEL)             does the quote support the value?
+  7. policy (script)                      policy.json; vendor values override the
+                                          catalog recommended defaults per key
+  8. assembler (LLM, REVIEWER_MODEL)      test cases; script fills any gaps
+  9. reviewer (LLM, REVIEWER_MODEL)       advisory findings
+ 10. renderers + check-policy (script)    Bedrock / NeMo drafts; same checks as CI
+
+Counting unit: controls. A control is "grounded" if at least one value is
+vendor-grounded, otherwise "catalog-default" (opinionated baseline, NOT
+vendor-backed); unselected controls are "excluded".
 
 Only cloud models are allowed (see pipeline.enforce_cloud_models).
 The profile must be SANITIZED: it is sent to the model provider.
+Rate-limit and connection errors are retried 3 times with exponential
+backoff; a specialist that still fails is retried once more.
 
 Writes outputs/<run>/: policy.json (canonical, schema-validated),
 exceptions.md (tiers, waivers, every dropped proposal and why), tests.jsonl
 (>= 1 test per selected control), evidence.json, bedrock-guardrail.json /
 nemo-config.yml with their reports; plus logs/<run>/.
---dry-run validates the profile, selects controls and prints the prompts
-without calling any model.
+--dry-run selects controls and prints the prompts without any model call.
+--no-llm builds the policy from catalog defaults only (no model call).
 
 Exit codes: 0 ok, 1 checks failed, 2 a step failed, 64 usage / invalid input.
 Standard library only.
@@ -62,7 +73,9 @@ SEL = _load("select_controls", "select-controls.py")
 GEN = _load("gen_configs", "gen-configs.py")
 RB = _load("render_bedrock", "render-bedrock.py")
 RN = _load("render_nemo", "render-nemo.py")
+CP = _load("check_policy", "check-policy.py")
 import guardrail_policy as GP  # noqa: E402
+import guardrail_values as GV  # noqa: E402
 
 CONFIG = "agents/guardrail-policy-generator.yaml"
 DEFAULTS = {
@@ -74,6 +87,35 @@ DEFAULTS = {
 }
 MODEL_VARS = ("ROUTER_MODEL", "SPECIALIST_MODEL", "REVIEWER_MODEL", "JUDGE_MODEL")
 PARAM_NAME = re.compile(r"^[a-z][a-z0-9_]{0,59}$")
+PARALLEL_DEFAULT, PARALLEL_MAX = 4, 7
+RETRY_TRIES = 3
+RETRYABLE = re.compile(r"429|rate.?limit|too many requests|connection|stalled|timed? ?out|timeout|"
+                       r"temporar|unavailable|50[234]|EOF|reset by peer|no data received", re.I)
+
+
+def clamp_parallel(n: int) -> int:
+    return max(1, min(PARALLEL_MAX, n))
+
+
+def is_retryable(run: "P.AgentRun") -> bool:
+    """Cloud rate limits and connection problems are worth retrying."""
+    return bool(RETRYABLE.search(" ".join(run.errors)))
+
+
+def call_agent(config, agent, prompt, log_path, timeout, run=None, sleep=time.sleep):
+    """run_agent with up to RETRY_TRIES tries and exponential backoff
+    (GUARDRAIL_BACKOFF_SECONDS * 2**attempt) on rate-limit/connection errors."""
+    run = run or P.run_agent
+    base = float(os.environ.get("GUARDRAIL_BACKOFF_SECONDS", "5"))
+    for attempt in range(RETRY_TRIES):
+        path = log_path if attempt == 0 else log_path.with_suffix(f".try{attempt + 1}.ndjson")
+        r = run(config, agent, prompt, path, timeout)
+        if (r.rc == 0 and r.final) or not is_retryable(r) or attempt == RETRY_TRIES - 1:
+            return r
+        wait = base * 2 ** attempt
+        log(f"{agent}: retryable error ({r.errors[-1][:80]}); retry {attempt + 2}/{RETRY_TRIES} in {wait:g}s")
+        sleep(wait)
+    return r
 
 
 def log(msg: str) -> None:
@@ -175,6 +217,8 @@ def fetch_page(url: str, cache: Path, max_age_days: float) -> P.Page:
 def keywords(controls: list[dict]) -> set[str]:
     words = set(HINT_WORDS)
     for c in controls:
+        for k in c.get("allowed_parameter_keys", []):
+            words.update(w for w in k.split("_") if len(w) >= 4 and w not in STOP)
         for w in re.findall(r"[a-z][a-z-]{3,}", (c["name"] + " " + c["description"]).lower()):
             if w not in STOP:
                 words.add(w.rstrip("s"))
@@ -263,55 +307,71 @@ def extract_objects(text: str) -> list:
             i += 1
 
 
-def is_value(v) -> bool:
-    if isinstance(v, (str, bool, int, float)):
-        return True
-    return isinstance(v, list) and all(isinstance(x, (str, bool, int, float)) for x in v)
 
+def parse_proposals(text: str, value_types: dict[str, dict]) -> tuple[list[dict], list[dict], list[dict]]:
+    """Return (valid proposals, rejected items with reason, null answers).
 
-def parse_proposals(text: str, allowed: dict[str, list[str]]) -> tuple[list[dict], list[dict]]:
-    """Return (valid proposals, rejected items with reason). `allowed` maps
-    each control id assigned to this specialist to its allowed parameter keys."""
+    `value_types` maps each control id assigned to this specialist to its
+    {key: value_type} (the allowed keys). Accepts per-key items
+    {"control_id", "key", "value", ...} and the older
+    {"control_id", "parameters": {...}, ...}. Every proposal returned holds
+    exactly one parameter whose value passed the catalog value-type check
+    (before any judge sees it)."""
     data = extract_json(text, "[")
     if not isinstance(data, list) or not data:
         # Fall back to every well-formed object that has a control_id, so one
         # broken item (or a truncated array) does not lose the others.
         data = extract_objects(text)
         if not data:
-            return [], [] if re.fullmatch(r"\s*(```(json)?\s*)?\[\s*\](\s*```)?\s*", text) else \
-                [{"item": text[:200], "reason": "output contains no JSON proposal objects"}]
-    ok, bad = [], []
+            return [], ([] if re.fullmatch(r"\s*(```(json)?\s*)?\[\s*\](\s*```)?\s*", text) else
+                        [{"item": text[:200], "reason": "output contains no JSON proposal objects"}]), []
+    ok, bad, nulls = [], [], []
     unparsed = text.count('"control_id"') - len(data)
     if unparsed > 0:
         bad.append({"item": text[:200], "reason": f"{unparsed} proposal(s) in the output were not valid JSON"})
     for item in data:
-        why = None
         if not isinstance(item, dict):
-            why = "not an object"
-        elif item.get("control_id") not in allowed:
-            why = f"control_id {item.get('control_id')!r} was not assigned to this specialist"
-        elif not isinstance(item.get("parameters"), dict) or not item["parameters"]:
-            why = "no parameters"
-        elif not all(PARAM_NAME.match(str(k)) and is_value(v) for k, v in item["parameters"].items()):
-            why = "parameter names must be snake_case and values scalar or list"
-        elif set(item["parameters"]) - set(allowed[item["control_id"]]):
-            extra = sorted(set(item["parameters"]) - set(allowed[item["control_id"]]))
-            why = f"parameter key(s) {extra} not in allowed_parameter_keys for {item['control_id']}"
-        elif not isinstance(item.get("source_url"), str) or not item["source_url"].startswith("https://"):
-            why = "missing or non-https source_url"
-        elif not isinstance(item.get("source_quote"), str) or not item["source_quote"].strip():
-            why = "missing source_quote"
-        if why:
-            bad.append({"item": item, "reason": why})
+            bad.append({"item": item, "reason": "not an object"})
             continue
-        ok.append({
-            "control_id": item["control_id"],
-            "parameters": item["parameters"],
-            "rationale": str(item.get("rationale") or "").strip(),
-            "source_url": P.clean_url(item["source_url"]),
-            "source_quote": item["source_quote"].strip().strip('"'),
-        })
-    return ok, bad
+        cid = item.get("control_id")
+        if cid not in value_types:
+            bad.append({"item": item, "reason": f"control_id {cid!r} was not assigned to this specialist"})
+            continue
+        if "key" in item:
+            pairs = [(item.get("key"), item.get("value"))]
+        elif isinstance(item.get("parameters"), dict) and item["parameters"]:
+            pairs = list(item["parameters"].items())
+        else:
+            bad.append({"item": item, "reason": "no parameters"})
+            continue
+        url, quote = item.get("source_url"), item.get("source_quote")
+        for key, value in pairs:
+            one = dict(item, key=key, value=value)
+            one.pop("parameters", None)
+            if not isinstance(key, str) or not PARAM_NAME.match(key):
+                bad.append({"item": one, "reason": "parameter name must be snake_case"})
+                continue
+            if key not in value_types[cid]:
+                bad.append({"item": one, "reason": f"parameter key(s) ['{key}'] not in allowed_parameter_keys for {cid}"})
+                continue
+            if value is None:
+                nulls.append({"control_id": cid, "key": key})
+                continue
+            if not isinstance(url, str) or not url.startswith("https://"):
+                bad.append({"item": one, "reason": "missing or non-https source_url"})
+                continue
+            if not isinstance(quote, str) or not quote.strip():
+                bad.append({"item": one, "reason": "missing source_quote"})
+                continue
+            quote_clean = quote.strip().strip('"')
+            norm, why = GV.check_value(value_types[cid][key], value, quote_clean)
+            if why:
+                bad.append({"item": one, "reason": f"value type check: {why}"})
+                continue
+            ok.append({"control_id": cid, "parameters": {key: norm},
+                       "rationale": str(item.get("rationale") or "").strip(),
+                       "source_url": P.clean_url(url), "source_quote": quote_clean})
+    return ok, bad, nulls
 
 
 def to_fact(n: int, prop: dict, name: str) -> P.Fact:
@@ -331,8 +391,12 @@ def main(argv=None) -> int:
     ap.add_argument("-c", "--config", default=os.environ.get("GUARDRAIL_CFG", CONFIG))
     ap.add_argument("--out-dir", default=os.environ.get("OUT_DIR", "outputs"))
     ap.add_argument("--timeout", type=int, default=int(os.environ.get("STAGE_TIMEOUT", "900")))
-    ap.add_argument("--parallel", type=int, default=int(os.environ.get("GUARDRAIL_PARALLEL", "3")))
+    ap.add_argument("--parallel", type=int, default=int(os.environ.get("GUARDRAIL_PARALLEL", str(PARALLEL_DEFAULT))),
+                    help=f"specialists run at once (default {PARALLEL_DEFAULT}, max {PARALLEL_MAX})")
     ap.add_argument("--dry-run", action="store_true", help="select controls and print prompts; no model calls")
+    ap.add_argument("--no-llm", action="store_true",
+                    help="no model calls: policy from catalog recommended defaults only (all catalog-default), "
+                         "script-generated tests, renderers and checks")
     try:
         args = ap.parse_args(argv)
     except SystemExit as e:
@@ -381,7 +445,7 @@ def main(argv=None) -> int:
         "run_id": run_id, "question": f"guardrail policy for profile {name}", "config": args.config,
         "mode": "guardrail-pipeline", "models": {k: os.environ[k] for k in MODEL_VARS},
         "catalog_version": catalog["catalog_version"], "selection": selection,
-        "stages": {}, "facts": [], "pages": {}, "rejected": [],
+        "stages": {}, "facts": [], "pages": {}, "rejected": [], "no_vendor_value": [],
     }
 
     def stage(r: P.AgentRun) -> None:
@@ -399,6 +463,71 @@ def main(argv=None) -> int:
         (ROOT / args.out_dir / ".last-guardrail").write_text(f"{args.out_dir}/{run_id}\n", encoding="utf-8")
         log(f"{result} -> {args.out_dir}/{run_id}/ ({evidence['seconds_total']}s)")
         return code
+
+    def finalize(proposals, grounded, dropped, failed, stage_failures, use_llm):
+        """Policy, tests, exceptions, renderers and checks. Shared by the
+        model pipeline and --no-llm (catalog defaults only)."""
+        # canonical policy
+        policy, conflicts = GP.build_policy(profile, catalog, selection, grounded, run_id)
+        dropped += conflicts
+        errors = GP.validate_policy(policy)
+        (out / "policy.json").write_text(json.dumps(policy, indent=2) + "\n", encoding="utf-8")
+        if errors:
+            evidence["policy_errors"] = errors
+            return finish(1, "CHECKS FAILED: policy.json does not match schemas/policy.schema.json")
+
+        # assembler: test cases (script fallback for any control without one)
+        controls_in = [{"control_id": c["control_id"], "name": c["name"], "category": c["category"], "tier": c["tier"],
+                        "parameters": {p["name"]: p["value"] for p in c["parameters"]}} for c in policy["controls"]]
+        assembled = {}
+        if use_llm:
+            ar = call_agent(args.config, "assembler", json.dumps({"controls": controls_in}, indent=1),
+                            logs / "assembler.ndjson", args.timeout)
+            stage(ar)
+            assembled = extract_json(ar.final, "{") if ar.rc == 0 else None
+            if not isinstance(assembled, dict):
+                stage_failures.append("assembler")
+                assembled = {}
+        tests, bad_tests = GP.build_tests(policy, assembled.get("tests", []))
+        dropped += bad_tests
+
+        # reviewer: advisory findings
+        review = {"findings": []}
+        if use_llm:
+            rr = call_agent(args.config, "reviewer",
+                            json.dumps({"profile": profile, "controls": controls_in, "tests": tests}, indent=1),
+                            logs / "reviewer.ndjson", args.timeout)
+            stage(rr)
+            review = extract_json(rr.final, "{") if rr.rc == 0 else None
+            if not isinstance(review, dict):
+                stage_failures.append("reviewer")
+                review = {"findings": []}
+
+        (out / "tests.jsonl").write_text("".join(json.dumps(t) + "\n" for t in tests), encoding="utf-8")
+        (out / "exceptions.md").write_text(
+            GP.exceptions_md(policy, catalog, dropped, failed, review.get("findings", []), tests), encoding="utf-8")
+        (out / "review.json").write_text(json.dumps(review, indent=2) + "\n", encoding="utf-8")
+        for renderer in (RB, RN):
+            renderer.main([str(out / "policy.json")])
+        evidence["counts"] = GP.counts(policy)  # counting unit: controls
+        evidence["counts"]["proposals_total"] = len(proposals)
+        evidence["counts"]["proposals_supported"] = len(grounded)
+        evidence["counts"]["proposals_dropped"] = len(dropped)
+
+        # check-policy: the same deterministic checks CI runs
+        problems = CP.check(policy, catalog, tests)
+        evidence["check_policy"] = problems or "PASS"
+        if problems:
+            return finish(1, f"CHECKS FAILED: check-policy found {len(problems)} problem(s), see evidence.json")
+        if stage_failures:
+            return finish(2, f"BRIEFING FAILED: {', '.join(stage_failures)} returned no usable output (other outputs written)")
+        n = evidence["counts"]
+        return finish(0, f"OK (controls): {n['grounded']} grounded, {n['catalog_default']} catalog-default, "
+                         f"{n['excluded']} excluded")
+
+    if args.no_llm:
+        evidence["mode"] = "guardrail-no-llm"
+        return finalize([], [], [], [], [], use_llm=False)
 
     # 2. start pages, fetched once by this script (cached under fetched/guardrail/)
     budget = int(os.environ.get("GUARDRAIL_CONTEXT_CHARS", "24000"))
@@ -420,14 +549,14 @@ def main(argv=None) -> int:
     # 3. specialists, in parallel (one retry each)
     def run_specialist(cat: str):
         agent = f"{cat}_specialist"
-        r = P.run_agent(args.config, agent, prompts[cat], logs / f"{agent}.ndjson", args.timeout)
+        r = call_agent(args.config, agent, prompts[cat], logs / f"{agent}.ndjson", args.timeout)
         if r.rc != 0 or not r.final:
             log(f"{agent}: retrying once")
-            r = P.run_agent(args.config, agent, prompts[cat], logs / f"{agent}.retry.ndjson", args.timeout)
+            r = call_agent(args.config, agent, prompts[cat], logs / f"{agent}.retry.ndjson", args.timeout)
         return cat, r
 
     runs: dict[str, P.AgentRun] = {}
-    with cf.ThreadPoolExecutor(max_workers=max(1, args.parallel)) as pool:
+    with cf.ThreadPoolExecutor(max_workers=clamp_parallel(args.parallel)) as pool:
         for cat, r in pool.map(run_specialist, list(work)):
             runs[cat] = r
             stage(r)
@@ -443,7 +572,8 @@ def main(argv=None) -> int:
     evidence["pages"] = P.save_pages([p for r in runs.values() for p in r.pages], ROOT / "fetched")
     proposals = []
     for cat, r in runs.items():
-        ok, bad = parse_proposals(r.final, {c["id"]: c["allowed_parameter_keys"] for c in work[cat]})
+        ok, bad, nulls = parse_proposals(r.final, {c["id"]: c["value_types"] for c in work[cat]})
+        evidence["no_vendor_value"] += nulls
         proposals += ok
         evidence["rejected"] += [dict(b, category=cat) for b in bad]
     (out / "specialists.json").write_text(json.dumps(proposals, indent=2) + "\n", encoding="utf-8")
@@ -457,7 +587,7 @@ def main(argv=None) -> int:
     log(f"quote check: {len(pending)} found on page, {len(facts) - len(pending)} rejected")
     stage_failures = list(failed)
     if pending:
-        jr = P.run_agent(args.config, "judge", "\n".join(f"[{f.n}] {f.line}" for f in pending),
+        jr = call_agent(args.config, "judge", "\n".join(f"[{f.n}] {f.line}" for f in pending),
                          logs / "judge.ndjson", args.timeout)
         stage(jr)
         if jr.rc != 0 or not jr.final:
@@ -481,52 +611,8 @@ def main(argv=None) -> int:
                             "reason": f"{f.verdict}: {f.note}",
                             "detail": f"{json.dumps(p['parameters'])} from {f.url}"})
 
-    # 8. canonical policy
-    policy, conflicts = GP.build_policy(profile, catalog, selection, grounded, run_id)
-    dropped += conflicts
-    errors = GP.validate_policy(policy)
-    (out / "policy.json").write_text(json.dumps(policy, indent=2) + "\n", encoding="utf-8")
-    if errors:
-        evidence["policy_errors"] = errors
-        return finish(1, "CHECKS FAILED: policy.json does not match schemas/policy.schema.json")
+    return finalize(proposals, grounded, dropped, failed, stage_failures, use_llm=True)
 
-    # 6. assembler: test cases (script fallback for any control without one)
-    controls_in = [{"control_id": c["control_id"], "name": c["name"], "category": c["category"], "tier": c["tier"],
-                    "parameters": {p["name"]: p["value"] for p in c["parameters"]}} for c in policy["controls"]]
-    ar = P.run_agent(args.config, "assembler", json.dumps({"controls": controls_in}, indent=1),
-                     logs / "assembler.ndjson", args.timeout)
-    stage(ar)
-    assembled = extract_json(ar.final, "{") if ar.rc == 0 else None
-    if not isinstance(assembled, dict):
-        stage_failures.append("assembler")
-        assembled = {}
-    tests, bad_tests = GP.build_tests(policy, assembled.get("tests", []))
-    dropped += bad_tests
-
-    # 7. reviewer: advisory findings
-    rr = P.run_agent(args.config, "reviewer",
-                     json.dumps({"profile": profile, "controls": controls_in, "tests": tests}, indent=1),
-                     logs / "reviewer.ndjson", args.timeout)
-    stage(rr)
-    review = extract_json(rr.final, "{") if rr.rc == 0 else None
-    if not isinstance(review, dict):
-        stage_failures.append("reviewer")
-        review = {"findings": []}
-
-    (out / "tests.jsonl").write_text("".join(json.dumps(t) + "\n" for t in tests), encoding="utf-8")
-    (out / "exceptions.md").write_text(
-        GP.exceptions_md(policy, catalog, dropped, failed, review.get("findings", []), tests), encoding="utf-8")
-    (out / "review.json").write_text(json.dumps(review, indent=2) + "\n", encoding="utf-8")
-    for renderer in (RB, RN):
-        renderer.main([str(out / "policy.json")])
-    evidence["dropped"] = len(dropped)
-    evidence["tiers"] = {t: sum(c["tier"] == t for c in policy["controls"]) for t in ("grounded", "catalog-default")}
-    evidence["tiers"]["excluded"] = len(policy["excluded"])
-
-    if stage_failures:
-        return finish(2, f"BRIEFING FAILED: {', '.join(stage_failures)} returned no usable output (other outputs written)")
-    t = evidence["tiers"]
-    return finish(0, f"OK: {t['grounded']} grounded, {t['catalog-default']} catalog-default, {t['excluded']} excluded")
 
 if __name__ == "__main__":
     sys.exit(main())

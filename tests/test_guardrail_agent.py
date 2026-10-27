@@ -117,33 +117,65 @@ class Parsing(unittest.TestCase):
 
     def test_parse_proposals(self):
         url = "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-prompt-attack.html"
+        vt = {"INPUT-10": {"prompt_attack_strength": {"type": "enum", "enum": ["NONE", "LOW", "MEDIUM", "HIGH"]},
+                           "x": {"type": "boolean"}}}
         text = json.dumps([
-            {"control_id": "INPUT-10", "parameters": {"prompt_attack_strength": "HIGH"}, "rationale": "r",
+            {"control_id": "INPUT-10", "parameters": {"prompt_attack_strength": "high"}, "rationale": "r",
              "source_url": url, "source_quote": '"set the strength"'},
-            {"control_id": "TOOL-01", "parameters": {"x": 1}, "source_url": url, "source_quote": "q"},
+            {"control_id": "TOOL-01", "parameters": {"x": True}, "source_url": url, "source_quote": "q"},
             {"control_id": "INPUT-10", "parameters": {}, "source_url": url, "source_quote": "q"},
-            {"control_id": "INPUT-10", "parameters": {"Bad Name": 1}, "source_url": url, "source_quote": "q"},
+            {"control_id": "INPUT-10", "parameters": {"Bad Name": True}, "source_url": url, "source_quote": "q"},
             {"control_id": "INPUT-10", "parameters": {"x": {"nested": 1}}, "source_url": url, "source_quote": "q"},
-            {"control_id": "INPUT-10", "parameters": {"x": 1}, "source_url": "http://x", "source_quote": "q"},
-            {"control_id": "INPUT-10", "parameters": {"x": 1}, "source_url": url},
+            {"control_id": "INPUT-10", "parameters": {"x": True}, "source_url": "http://x", "source_quote": "q"},
+            {"control_id": "INPUT-10", "parameters": {"x": True}, "source_url": url},
+            {"control_id": "INPUT-10", "key": "x", "value": None, "source_url": url, "source_quote": ""},
         ])
-        ok, bad = GR.parse_proposals(text, {"INPUT-10": ["prompt_attack_strength", "x", "Bad Name"]})
-        self.assertEqual(len(ok), 1)
+        ok, bad, nulls = GR.parse_proposals(text, vt)
+        self.assertEqual([o["parameters"] for o in ok], [{"prompt_attack_strength": "HIGH"}])  # normalised enum
         self.assertEqual(ok[0]["source_quote"], "set the strength")
         self.assertEqual(len(bad), 6, bad)
         self.assertIn("not assigned", bad[0]["reason"])
-        ok, bad = GR.parse_proposals(json.dumps([{"control_id": "INPUT-10", "parameters": {"made_up_key": 1},
-                                                  "source_url": url, "source_quote": "q"}]), {"INPUT-10": ["x"]})
+        self.assertIn("value type check", bad[3]["reason"])
+        self.assertEqual(nulls, [{"control_id": "INPUT-10", "key": "x"}])
+        ok, bad, _ = GR.parse_proposals(json.dumps([{"control_id": "INPUT-10", "parameters": {"made_up_key": 1},
+                                                     "source_url": url, "source_quote": "q"}]), vt)
         self.assertEqual(ok, [])
         self.assertIn("not in allowed_parameter_keys", bad[0]["reason"])
-        broken = ('[{"control_id": "INPUT-10", "parameters": {"x": 1}, "source_url": "https://a", "source_quote": "q"},'
-                  '{"control_id": "INPUT-10", "parameters": {"x": 2}, "source_url": "https://a", "source_quote": "q",}]')
-        ok, bad = GR.parse_proposals(broken, {"INPUT-10": ["x"]})
-        self.assertEqual([o["parameters"] for o in ok], [{"x": 1}])
+        broken = ('[{"control_id": "INPUT-10", "key": "x", "value": true, "source_url": "https://a", "source_quote": "q"},'
+                  '{"control_id": "INPUT-10", "key": "x", "value": false, "source_url": "https://a", "source_quote": "q",}]')
+        ok, bad, _ = GR.parse_proposals(broken, vt)
+        self.assertEqual([o["parameters"] for o in ok], [{"x": True}])
         self.assertIn("1 proposal(s) in the output were not valid JSON", bad[0]["reason"])
-        self.assertEqual(GR.parse_proposals("```json\n[]\n```", {"INPUT-10": ["x"]}), ([], []))
-        ok, bad = GR.parse_proposals("I could not find anything.", {"INPUT-10": ["x"]})
+        self.assertEqual(GR.parse_proposals("```json\n[]\n```", vt), ([], [], []))
+        ok, bad, _ = GR.parse_proposals("I could not find anything.", vt)
         self.assertEqual((ok, len(bad)), ([], 1))
+
+    def test_known_bad_values_rejected_before_the_judge(self):
+        """The three bad values that passed the judge in the Step 4 runs."""
+        cat = {c["id"]: c for c in json.loads((ROOT / "seeds/guardrail-catalog.json").read_text())["controls"]}
+        vt = {cid: cat[cid]["value_types"] for cid in ("OUTPUT-04", "PROMPT-01", "INPUT-07", "RUNTIME-04")}
+        bedrock = "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-word-filters.html"
+        nemo = "https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/fact-checking.md"
+        text = json.dumps([
+            {"control_id": "OUTPUT-04", "key": "profanity_filter", "value": "BLOCK", "source_url": bedrock,
+             "source_quote": "Choose BLOCK to block content and replace with blocked messaging"},
+            {"control_id": "PROMPT-01", "key": "input_tagging", "value": "input tags for guardrails", "source_url": bedrock,
+             "source_quote": "With input tags for guardrails, the prompt attack filter will detect malicious intents"},
+            {"control_id": "INPUT-07", "key": "max_input_tokens", "value": 1024, "source_url": nemo,
+             "source_quote": "if unset, the action falls back to 1024 tokens."},
+            {"control_id": "RUNTIME-04", "key": "max_input_tokens", "value": 1024, "source_url": nemo,
+             "source_quote": "if unset, the action falls back to 1024 tokens."},
+            # A good one for contrast: number in the quote and about input size.
+            {"control_id": "INPUT-07", "key": "max_input_chars", "value": 10000, "source_url": nemo,
+             "source_quote": "Prompt: supports a maximum of 10,000 characters"},
+        ])
+        ok, bad, _ = GR.parse_proposals(text, vt)
+        self.assertEqual([o["parameters"] for o in ok], [{"max_input_chars": 10000}])
+        reasons = [b["reason"] for b in bad]
+        self.assertIn("expected true/false, got 'BLOCK'", reasons[0])
+        self.assertIn("expected true/false, got 'input tags for guardrails'", reasons[1])
+        self.assertIn("does not mention input / prompt / request / context", reasons[2])
+        self.assertIn("does not mention input / prompt / request / context", reasons[3])
 
     def test_fact_line_goes_through_quote_check(self):
         url = "https://docs.nvidia.com/nemo/guardrails/x.md"
@@ -169,6 +201,39 @@ class Parsing(unittest.TestCase):
         self.assertNotIn("memory_specialist", text)
         self.assertIn("TOOL-05 | tool | Transaction limits", text)
         self.assertIn("START PAGES:", text)
+
+
+class Retry(unittest.TestCase):
+    def fake(self, outcomes):
+        calls = []
+
+        def run(config, agent, prompt, path, timeout):
+            calls.append(path.name)
+            rc, final, errors = outcomes[len(calls) - 1]
+            return P.AgentRun(agent, rc, 0.1, final, [], errors, 0)
+        return run, calls
+
+    def test_backoff_on_rate_limit_then_success(self):
+        run, calls = self.fake([(1, "", ["429 Too Many Requests"]), (1, "", ["connection reset by peer"]), (0, "[]", [])])
+        slept = []
+        with contextlib.redirect_stderr(io.StringIO()), mock.patch.dict(os.environ, {"GUARDRAIL_BACKOFF_SECONDS": "2"}):
+            r = GR.call_agent("c", "judge", "p", Path("/tmp/judge.ndjson"), 1, run=run, sleep=slept.append)
+        self.assertEqual((r.rc, r.final), (0, "[]"))
+        self.assertEqual(slept, [2.0, 4.0])
+        self.assertEqual(calls, ["judge.ndjson", "judge.try2.ndjson", "judge.try3.ndjson"])
+
+    def test_gives_up_after_three_tries_and_skips_non_retryable(self):
+        run, calls = self.fake([(1, "", ["model stream stalled: no data received"])] * 3)
+        with contextlib.redirect_stderr(io.StringIO()):
+            r = GR.call_agent("c", "x", "p", Path("/tmp/x.ndjson"), 1, run=run, sleep=lambda s: None)
+        self.assertEqual((r.rc, len(calls)), (1, 3))
+        run, calls = self.fake([(1, "", ["invalid config: unknown field"])])
+        r = GR.call_agent("c", "x", "p", Path("/tmp/x.ndjson"), 1, run=run, sleep=lambda s: None)
+        self.assertEqual(len(calls), 1)
+
+    def test_parallel_clamped(self):
+        self.assertEqual([GR.clamp_parallel(n) for n in (0, 4, 7, 20)], [1, 4, 7, 7])
+        self.assertEqual(GR.PARALLEL_DEFAULT, 4)
 
 
 class Sources(unittest.TestCase):
