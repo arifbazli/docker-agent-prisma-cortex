@@ -58,6 +58,32 @@ FAILED_PREFIX = "BRIEFING FAILED:"
 VERDICTS = ("PARTLY SUPPORTED", "UNSUPPORTED", "UNVERIFIABLE", "SUPPORTED")
 
 
+CLOUD_ONLY_MESSAGE = "local models are disabled; use a cloud model"
+
+
+def is_cloud_model(name: str) -> bool:
+    """Ollama cloud models end in ":cloud" or "-cloud" (e.g. gpt-oss:120b-cloud)."""
+    name = (name or "").strip()
+    return name.endswith(":cloud") or name.endswith("-cloud")
+
+
+def local_models(models: dict) -> list[str]:
+    """Return 'VAR=name' for every model setting that is not a cloud model."""
+    return [f"{k}={v}" for k, v in models.items() if not is_cloud_model(v)]
+
+
+def enforce_cloud_models(models: dict) -> int:
+    """0 if all models are cloud models (or ALLOW_LOCAL_MODELS=1), else
+    print the error and return 64."""
+    if os.environ.get("ALLOW_LOCAL_MODELS") == "1":
+        return 0
+    bad = local_models(models)
+    if bad:
+        print(f"{CLOUD_ONLY_MESSAGE}: {', '.join(bad)} (set ALLOW_LOCAL_MODELS=1 to override)", file=sys.stderr)
+        return 64
+    return 0
+
+
 def log(msg: str) -> None:
     print(f"[pipeline] {msg}", file=sys.stderr, flush=True)
 
@@ -322,7 +348,18 @@ def parse_facts(text: str) -> list[Fact]:
     return facts
 
 
+# Hosts where only some paths are acceptable sources (the fetch tool can
+# only restrict whole hosts). Hub agents never cite these hosts.
+ALLOWED_PATH_PREFIXES = {
+    "docs.aws.amazon.com": ("/bedrock/latest/userguide/guardrails",),
+}
+
+
 def banned_url(url: str) -> str | None:
+    m = re.match(r"https?://([^/?#]+)(/[^?#]*)?", url.strip())
+    if m and m.group(1).lower() in ALLOWED_PATH_PREFIXES:
+        if not (m.group(2) or "/").startswith(ALLOWED_PATH_PREFIXES[m.group(1).lower()]):
+            return "URL is outside the allowed documentation path for this host"
     if "?" in url or "&goal=" in url:
         return "URL is a generated ?ask= answer, not a content page"
     low = url.lower().rstrip("/")
@@ -476,6 +513,9 @@ def main() -> int:
     for k, v in DEFAULTS.items():
         os.environ.setdefault(k, v)
     os.environ.setdefault("TELEMETRY_ENABLED", "false")
+    rc = enforce_cloud_models({k: os.environ[k] for k in DEFAULTS if k.endswith("_MODEL")})
+    if rc:
+        return rc
 
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     run_id = f"{stamp}-{slugify(question)}"

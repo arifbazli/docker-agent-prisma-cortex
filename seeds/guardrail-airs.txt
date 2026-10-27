@@ -1,0 +1,4 @@
+# Palo Alto Networks Prisma AIRS (AI Runtime Security).
+https://docs.paloaltonetworks.com/prisma-airs/getting-started/ai-runtime-security-overview
+https://docs.paloaltonetworks.com/prisma-airs/ai-gateway/ai-gateway-overview
+https://pan.dev/airs/

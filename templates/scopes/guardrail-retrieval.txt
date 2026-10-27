@@ -1,0 +1,13 @@
+# Specialist overlay for the Retrieval category.
+=== CATEGORY ===
+retrieval
+=== CATEGORY_NAME ===
+Retrieval
+=== FOCUS ===
+You cover retrieval-augmented generation: which sources and documents
+may be retrieved, freshness, trust, chunk checks, metadata filters,
+de-duplication, re-ranking, grounding and citation requirements.
+=== SOURCES ===
+{{SEEDS_GUARDRAIL_BEDROCK}}
+{{SEEDS_GUARDRAIL_NEMO}}
+{{SEEDS_GUARDRAIL_OWASP}}

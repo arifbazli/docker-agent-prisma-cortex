@@ -1,0 +1,14 @@
+# Specialist overlay for the Input category (fills one block of templates/guardrail-agent.yaml.tmpl).
+=== CATEGORY ===
+input
+=== CATEGORY_NAME ===
+Input
+=== FOCUS ===
+You cover checks applied to user, document and file input before it
+reaches the model: validation, sanitization, file and malware checks,
+size and rate limits, language checks and prompt-injection screening.
+=== SOURCES ===
+{{SEEDS_GUARDRAIL_BEDROCK}}
+{{SEEDS_GUARDRAIL_NEMO}}
+{{SEEDS_GUARDRAIL_AIRS}}
+{{SEEDS_GUARDRAIL_OWASP}}

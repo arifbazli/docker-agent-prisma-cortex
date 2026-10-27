@@ -1,0 +1,15 @@
+# Specialist overlay for the Output category.
+=== CATEGORY ===
+output
+=== CATEGORY_NAME ===
+Output
+=== FOCUS ===
+You cover checks on model output before it reaches users or other
+systems: moderation, toxicity, PII masking, policy and word filters,
+hallucination and citation checks, disclaimers, restricted topics,
+format enforcement and response validation.
+=== SOURCES ===
+{{SEEDS_GUARDRAIL_BEDROCK}}
+{{SEEDS_GUARDRAIL_NEMO}}
+{{SEEDS_GUARDRAIL_AIRS}}
+{{SEEDS_GUARDRAIL_OWASP}}

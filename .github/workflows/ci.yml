@@ -40,6 +40,8 @@ jobs:
           JUDGE_MODEL: placeholder
           WRITER_MODEL: placeholder
           ROUTER_MODEL: placeholder
+          SPECIALIST_MODEL: placeholder
+          REVIEWER_MODEL: placeholder
         run: |
           for f in agents/*.yaml; do
             echo "== $f"; docker-agent debug config "$f" > /dev/null
