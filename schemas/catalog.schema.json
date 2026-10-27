@@ -113,7 +113,9 @@
           "enforcement_point",
           "supported_targets",
           "default_severity",
-          "allowed_parameter_keys"
+          "allowed_parameter_keys",
+          "value_types",
+          "recommended_defaults"
         ],
         "additionalProperties": false,
         "properties": {
@@ -256,6 +258,75 @@
               "pattern": "^[a-z][a-z0-9_]{0,59}$"
             },
             "description": "The only parameter names a specialist may propose for this control."
+          },
+          "value_types": {
+            "type": "object",
+            "description": "One entry per allowed parameter key.",
+            "additionalProperties": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "boolean",
+                    "number",
+                    "string",
+                    "enum",
+                    "list"
+                  ]
+                },
+                "enum": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "items_enum": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "min": {
+                  "type": "number"
+                },
+                "max": {
+                  "type": "number"
+                },
+                "quote_terms": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "recommended_defaults": {
+            "type": "object",
+            "description": "Opinionated, conservative baseline values (NOT vendor-backed). Keys must be allowed keys and values must match value_types.",
+            "additionalProperties": {
+              "type": [
+                "boolean",
+                "number",
+                "string",
+                "array"
+              ]
+            }
           }
         }
       }

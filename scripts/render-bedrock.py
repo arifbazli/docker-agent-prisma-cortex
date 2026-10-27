@@ -37,6 +37,9 @@ PII_TYPES.update({"email_address": "EMAIL", "phone_number": "PHONE", "person": "
                   "us_passport": "US_PASSPORT_NUMBER", "us_bank_number": "US_BANK_ACCOUNT_NUMBER", "us_itin": "US_INDIVIDUAL_TAX_IDENTIFICATION_NUMBER"})
 
 
+TAKEN = "target field already set by a vendor-grounded value or an earlier control"
+
+
 def _list(v):
     return v if isinstance(v, list) else [v]
 
@@ -52,82 +55,97 @@ def render(policy: dict):
     mapped, unsupported = [], []
 
     def ok(c, p, field, value=None):
-        mapped.append({"control_id": c["control_id"], "tier": c["tier"], "parameter": p["name"],
-                       "value": p["value"] if value is None else value, "field": field})
+        mapped.append(R.mapped_row(c, p, field, value))
 
-    for c in policy["controls"]:
-        params = {p["name"]: p for p in c["parameters"]}
-        if not params:
-            unsupported.append(R.unsupported_row(c, None, ""))
-            continue
-        for name, p in params.items():
-            v = p["value"]
-            if name == "prompt_attack_strength":
-                s = R.norm_enum(v, STRENGTH)
-                if s:
-                    content["PROMPT_ATTACK"] = {"type": "PROMPT_ATTACK", "inputStrength": s, "outputStrength": "NONE"}
-                    ok(c, p, "contentPolicyConfig.filtersConfig[PROMPT_ATTACK].inputStrength", s)
+    # Vendor-grounded values are placed first; a catalog default never
+    # overwrites a target field that a vendor value (or an earlier control) set.
+    for basis in ("vendor-grounded", "catalog-default"):
+        for c in policy["controls"]:
+            params = {p["name"]: p for p in c["parameters"]}
+            if not params:
+                if basis == "vendor-grounded":
+                    unsupported.append(R.unsupported_row(c, None, ""))
+                continue
+            for name, p in params.items():
+                if p["basis"] != basis:
+                    continue
+                v = p["value"]
+                if name == "prompt_attack_strength":
+                    s = R.norm_enum(v, STRENGTH)
+                    if s and "PROMPT_ATTACK" in content:
+                        unsupported.append(R.unsupported_row(c, p, TAKEN))
+                    elif s:
+                        content["PROMPT_ATTACK"] = {"type": "PROMPT_ATTACK", "inputStrength": s, "outputStrength": "NONE"}
+                        ok(c, p, "contentPolicyConfig.filtersConfig[PROMPT_ATTACK].inputStrength", s)
+                    else:
+                        unsupported.append(R.unsupported_row(c, p, f"value {v!r} is not NONE/LOW/MEDIUM/HIGH"))
+                elif name == "content_filter_strength":
+                    s = R.norm_enum(v, STRENGTH)
+                    cats = [R.norm_enum(x, CATEGORIES) for x in _list(params.get("content_filter_categories", {}).get("value", []))]
+                    if not s:
+                        unsupported.append(R.unsupported_row(c, p, f"value {v!r} is not NONE/LOW/MEDIUM/HIGH"))
+                    elif not cats or None in cats:
+                        unsupported.append(R.unsupported_row(c, p, "needs grounded content_filter_categories from SEXUAL, VIOLENCE, HATE, INSULTS, MISCONDUCT in the same control"))
+                    elif not [x for x in cats if x not in content]:
+                        unsupported.append(R.unsupported_row(c, p, TAKEN))
+                    else:
+                        new = [x for x in cats if x not in content]
+                        for cat in new:
+                            content[cat] = {"type": cat, "inputStrength": s, "outputStrength": s}
+                        ok(c, p, f"contentPolicyConfig.filtersConfig[{','.join(new)}].input/outputStrength", s)
+                elif name == "content_filter_categories":
+                    if "content_filter_strength" not in params:
+                        unsupported.append(R.unsupported_row(c, p, "needs a grounded content_filter_strength in the same control"))
+                    else:
+                        ok(c, p, "contentPolicyConfig.filtersConfig[].type")
+                elif name == "profanity_filter":
+                    if v is True:
+                        managed = True
+                        ok(c, p, "wordPolicyConfig.managedWordListsConfig[PROFANITY]")
+                    else:
+                        unsupported.append(R.unsupported_row(c, p, "only profanity_filter=true maps to a managed word list"))
+                elif name == "blocked_words":
+                    vals = [str(x) for x in _list(v) if str(x).strip()]
+                    if vals:
+                        words += [w for w in vals if w not in words]
+                        ok(c, p, "wordPolicyConfig.wordsConfig[].text", vals)
+                    else:
+                        unsupported.append(R.unsupported_row(c, p, "no words given"))
+                elif name == "pii_entities":
+                    action = R.norm_enum(params.get("pii_action", {}).get("value", ""), PII_ACTION)
+                    types = [PII_TYPES.get(str(x).strip().lower()) for x in _list(v)]
+                    if not action:
+                        unsupported.append(R.unsupported_row(c, p, "needs a grounded pii_action (block or anonymize/mask) in the same control"))
+                    elif None in types:
+                        bad = [x for x, t in zip(_list(v), types) if t is None]
+                        unsupported.append(R.unsupported_row(c, p, f"not Bedrock PII types: {bad}"))
+                    elif not [t for t in types if t not in pii]:
+                        unsupported.append(R.unsupported_row(c, p, TAKEN))
+                    else:
+                        new = [t for t in types if t not in pii]
+                        for t in new:
+                            pii[t] = {"type": t, "action": action}
+                        ok(c, p, "sensitiveInformationPolicyConfig.piiEntitiesConfig[]", new)
+                elif name == "pii_action":
+                    if "pii_entities" not in params:
+                        unsupported.append(R.unsupported_row(c, p, "needs grounded pii_entities in the same control"))
+                    elif R.norm_enum(v, PII_ACTION):
+                        ok(c, p, "sensitiveInformationPolicyConfig.piiEntitiesConfig[].action", R.norm_enum(v, PII_ACTION))
+                    else:
+                        unsupported.append(R.unsupported_row(c, p, f"value {v!r} is not block/anonymize"))
+                elif name in ("grounding_threshold", "relevance_threshold"):
+                    kind = "GROUNDING" if name == "grounding_threshold" else "RELEVANCE"
+                    if kind in grounding:
+                        unsupported.append(R.unsupported_row(c, p, TAKEN))
+                    elif isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= 0.99:
+                        grounding[kind] = {"type": kind, "threshold": v}
+                        ok(c, p, f"contextualGroundingPolicyConfig.filtersConfig[{kind}].threshold")
+                    else:
+                        unsupported.append(R.unsupported_row(c, p, f"threshold must be a number from 0 to 0.99, got {v!r}"))
+                elif name == "denied_topics":
+                    unsupported.append(R.unsupported_row(c, p, "topicPolicyConfig needs a definition per topic, which only a human can write"))
                 else:
-                    unsupported.append(R.unsupported_row(c, p, f"value {v!r} is not NONE/LOW/MEDIUM/HIGH"))
-            elif name == "content_filter_strength":
-                s = R.norm_enum(v, STRENGTH)
-                cats = [R.norm_enum(x, CATEGORIES) for x in _list(params.get("content_filter_categories", {}).get("value", []))]
-                if not s:
-                    unsupported.append(R.unsupported_row(c, p, f"value {v!r} is not NONE/LOW/MEDIUM/HIGH"))
-                elif not cats or None in cats:
-                    unsupported.append(R.unsupported_row(c, p, "needs grounded content_filter_categories from SEXUAL, VIOLENCE, HATE, INSULTS, MISCONDUCT in the same control"))
-                else:
-                    for cat in cats:
-                        content[cat] = {"type": cat, "inputStrength": s, "outputStrength": s}
-                    ok(c, p, f"contentPolicyConfig.filtersConfig[{','.join(cats)}].input/outputStrength", s)
-            elif name == "content_filter_categories":
-                if "content_filter_strength" not in params:
-                    unsupported.append(R.unsupported_row(c, p, "needs a grounded content_filter_strength in the same control"))
-                else:
-                    ok(c, p, "contentPolicyConfig.filtersConfig[].type")
-            elif name == "profanity_filter":
-                if v is True:
-                    managed = True
-                    ok(c, p, "wordPolicyConfig.managedWordListsConfig[PROFANITY]")
-                else:
-                    unsupported.append(R.unsupported_row(c, p, "only profanity_filter=true maps to a managed word list"))
-            elif name == "blocked_words":
-                vals = [str(x) for x in _list(v) if str(x).strip()]
-                if vals:
-                    words += [w for w in vals if w not in words]
-                    ok(c, p, "wordPolicyConfig.wordsConfig[].text", vals)
-                else:
-                    unsupported.append(R.unsupported_row(c, p, "no words given"))
-            elif name == "pii_entities":
-                action = R.norm_enum(params.get("pii_action", {}).get("value", ""), PII_ACTION)
-                types = [PII_TYPES.get(str(x).strip().lower()) for x in _list(v)]
-                if not action:
-                    unsupported.append(R.unsupported_row(c, p, "needs a grounded pii_action (block or anonymize/mask) in the same control"))
-                elif None in types:
-                    bad = [x for x, t in zip(_list(v), types) if t is None]
-                    unsupported.append(R.unsupported_row(c, p, f"not Bedrock PII types: {bad}"))
-                else:
-                    for t in types:
-                        pii[t] = {"type": t, "action": action}
-                    ok(c, p, "sensitiveInformationPolicyConfig.piiEntitiesConfig[]", types)
-            elif name == "pii_action":
-                if "pii_entities" not in params:
-                    unsupported.append(R.unsupported_row(c, p, "needs grounded pii_entities in the same control"))
-                elif R.norm_enum(v, PII_ACTION):
-                    ok(c, p, "sensitiveInformationPolicyConfig.piiEntitiesConfig[].action", R.norm_enum(v, PII_ACTION))
-                else:
-                    unsupported.append(R.unsupported_row(c, p, f"value {v!r} is not block/anonymize"))
-            elif name in ("grounding_threshold", "relevance_threshold"):
-                kind = "GROUNDING" if name == "grounding_threshold" else "RELEVANCE"
-                if isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= 0.99:
-                    grounding[kind] = {"type": kind, "threshold": v}
-                    ok(c, p, f"contextualGroundingPolicyConfig.filtersConfig[{kind}].threshold")
-                else:
-                    unsupported.append(R.unsupported_row(c, p, f"threshold must be a number from 0 to 0.99, got {v!r}"))
-            elif name == "denied_topics":
-                unsupported.append(R.unsupported_row(c, p, "topicPolicyConfig needs a definition per topic, which only a human can write"))
-            else:
-                unsupported.append(R.unsupported_row(c, p, "no Bedrock Guardrails field for this parameter (implement in your gateway/app)"))
+                    unsupported.append(R.unsupported_row(c, p, "no Bedrock Guardrails field for this parameter (implement in your gateway/app)"))
 
     if content:
         body["contentPolicyConfig"] = {"filtersConfig": list(content.values())}

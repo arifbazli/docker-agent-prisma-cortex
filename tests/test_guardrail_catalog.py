@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import jsonschema_lite as V  # noqa: E402
+import guardrail_values as GV  # noqa: E402
 
 CATALOG = json.loads((ROOT / "seeds" / "guardrail-catalog.json").read_text())
 SCHEMAS = {p.stem.replace(".schema", ""): json.loads(p.read_text()) for p in (ROOT / "schemas").glob("*.schema.json")}
@@ -78,6 +79,35 @@ class Catalog(unittest.TestCase):
             for k in keys:
                 self.assertRegex(k, r"^[a-z][a-z0-9_]{0,59}$")
 
+    def test_value_types_cover_every_allowed_key(self):
+        self.assertEqual(len(CATALOG["controls"]), 70)
+        for c in CATALOG["controls"]:
+            self.assertEqual(set(c["value_types"]), set(c["allowed_parameter_keys"]), c["id"])
+            for key, spec in c["value_types"].items():
+                where = f"{c['id']}.{key}"
+                if spec["type"] == "enum":
+                    self.assertTrue(spec.get("enum"), where)
+                if spec["type"] == "number":
+                    self.assertLessEqual(spec["min"], spec["max"], where)
+                    self.assertTrue(spec.get("quote_terms"), f"{where}: numbers need quote_terms")
+                self.assertNotIn("enum", spec) if spec["type"] != "enum" else None
+
+    def test_same_key_same_type_everywhere(self):
+        seen = {}
+        for c in CATALOG["controls"]:
+            for key, spec in c["value_types"].items():
+                self.assertEqual(seen.setdefault(key, spec), spec, key)
+
+    def test_recommended_defaults_are_typed_and_allowed(self):
+        for c in CATALOG["controls"]:
+            for key, value in c["recommended_defaults"].items():
+                self.assertIn(key, c["allowed_parameter_keys"], c["id"])
+                norm, why = GV.check_value(c["value_types"][key], value)
+                self.assertIsNone(why, f"{c['id']}.{key}: {why}")
+                self.assertEqual(norm, value, f"{c['id']}.{key} is not in canonical form")
+        with_defaults = sum(bool(c["recommended_defaults"]) for c in CATALOG["controls"])
+        self.assertGreaterEqual(with_defaults, 66)
+
     def test_generic_target_everywhere(self):
         for c in CATALOG["controls"]:
             self.assertIn("generic", c["supported_targets"], c["id"])
@@ -125,7 +155,8 @@ class Schemas(unittest.TestCase):
             "controls": [{
                 "control_id": "INPUT-10", "category": "input", "name": "Injection screening", "severity": "high",
                 "enforcement_point": "pre_model", "targets": ["generic", "bedrock"], "tier": "grounded",
-                "parameters": [{"name": "prompt_attack_strength", "value": "HIGH", "rationale": "Documented filter strength.",
+                "parameters": [{"name": "prompt_attack_strength", "value": "HIGH", "basis": "vendor-grounded",
+                                "rationale": "Documented filter strength.",
                                 "source_url": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html",
                                 "source_quote": "prompt attack"}],
             }],

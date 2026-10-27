@@ -35,7 +35,7 @@ More examples:
 
 ```bash
 CFG=agents/cortex-cloud-hub.yaml scripts/run.sh "What does Cortex Cloud AI-SPM monitor?"
-JUDGE_MODEL=qwen3:32b scripts/run.sh "How do I authenticate to the Cortex Cloud API?"
+JUDGE_MODEL=gpt-oss:20b-cloud scripts/run.sh "How do I authenticate to the Cortex Cloud API?"
 ```
 
 **Output:** the briefing is printed and saved to `outputs/<run>.md`. `outputs/<run>.evidence.json` holds each fact, quote and verdict. Check **To confirm** items yourself. One-line results: `OUT OF SCOPE`, `NO FACTS FOUND`, `BRIEFING FAILED` (see `logs/`). Exit codes: `0` ok, `1` failed checks, `2` step failed.
