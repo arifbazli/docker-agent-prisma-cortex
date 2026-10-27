@@ -74,7 +74,8 @@ agents:
       The user's message contains a line starting with "PROFILE:" followed
       by a sanitized app profile as JSON, and a "SELECTED CONTROLS:" block
       produced by scripts/select-controls.py, one control per line:
-        <CONTROL-ID> | <category> | <name> | <description>
+        <CONTROL-ID> | <category> | <name> | <description> | keys: <allowed parameter keys>
+      (scripts/select-controls.py --lines PROFILE.json prints them).
       If either part is missing, reply exactly:
       INPUT ERROR: send PROFILE: <json> and SELECTED CONTROLS: <lines from scripts/select-controls.py>.
 
@@ -121,7 +122,7 @@ agents:
 
       INPUT: a "PROFILE:" line with a sanitized app profile (JSON) and a
       "CONTROLS:" block, one line per control:
-        <CONTROL-ID> | <category> | <name> | <description>
+        <CONTROL-ID> | <category> | <name> | <description> | keys: <allowed parameter keys>
       Work ONLY on the listed controls. Never add a control, never change a
       control id. If the CONTROLS block is empty, output [] and stop.
 
@@ -155,9 +156,9 @@ agents:
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/fact-checking.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/agentic-security.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/configuration-reference.md
-        https://docs.paloaltonetworks.com/prisma-airs/getting-started/ai-runtime-security-overview
-        https://docs.paloaltonetworks.com/prisma-airs/ai-gateway/ai-gateway-overview
-        https://pan.dev/airs/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/airuntimesecurityapi/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/usecases/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/scan/scan-sync-request/
         https://genai.owasp.org/llm-top-10/
         https://genai.owasp.org/llmrisk/llm01-prompt-injection/
         https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/
@@ -176,13 +177,22 @@ agents:
 
       OUTPUT: one JSON array and nothing else, no prose, no code fence:
       [{"control_id": "<id from CONTROLS>",
-        "parameters": {"<snake_case_name>": <string, number, boolean or list>},
+        "parameters": {"<a key from that control's keys list>": <string, number, boolean or list>},
         "rationale": "<one sentence: why this setting fits the profile>",
         "source_url": "<the exact page URL you fetched>",
         "source_quote": "<words copied character for character from that page, max 30 words>"}]
       You may output several objects for one control (one per source).
 
       NEVER INVENT PARAMETERS:
+        - Parameter names must come from the control's "keys:" list.
+          Anything else is rejected.
+        - Values must be concrete settings: a number, an option exactly as
+          the page spells it (for example HIGH, BLOCK, ANONYMIZE), true or
+          false, or a list of documented names. Never a description such as
+          "filter strength" or "custom words and phrases".
+        - If the page lists the options but does not say which to use, pick
+          the option that fits the profile and quote the sentence that lists
+          the options. A number must appear in source_quote.
         - Every parameter name and value must be stated in, or be a direct
           reading of, source_quote. A script checks that source_quote is on
           source_url and a judge checks that it supports the parameters;
@@ -220,7 +230,7 @@ agents:
 
       INPUT: a "PROFILE:" line with a sanitized app profile (JSON) and a
       "CONTROLS:" block, one line per control:
-        <CONTROL-ID> | <category> | <name> | <description>
+        <CONTROL-ID> | <category> | <name> | <description> | keys: <allowed parameter keys>
       Work ONLY on the listed controls. Never add a control, never change a
       control id. If the CONTROLS block is empty, output [] and stop.
 
@@ -254,9 +264,9 @@ agents:
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/fact-checking.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/agentic-security.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/configuration-reference.md
-        https://docs.paloaltonetworks.com/prisma-airs/getting-started/ai-runtime-security-overview
-        https://docs.paloaltonetworks.com/prisma-airs/ai-gateway/ai-gateway-overview
-        https://pan.dev/airs/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/airuntimesecurityapi/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/usecases/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/scan/scan-sync-request/
         https://genai.owasp.org/llm-top-10/
         https://genai.owasp.org/llmrisk/llm01-prompt-injection/
         https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/
@@ -275,13 +285,22 @@ agents:
 
       OUTPUT: one JSON array and nothing else, no prose, no code fence:
       [{"control_id": "<id from CONTROLS>",
-        "parameters": {"<snake_case_name>": <string, number, boolean or list>},
+        "parameters": {"<a key from that control's keys list>": <string, number, boolean or list>},
         "rationale": "<one sentence: why this setting fits the profile>",
         "source_url": "<the exact page URL you fetched>",
         "source_quote": "<words copied character for character from that page, max 30 words>"}]
       You may output several objects for one control (one per source).
 
       NEVER INVENT PARAMETERS:
+        - Parameter names must come from the control's "keys:" list.
+          Anything else is rejected.
+        - Values must be concrete settings: a number, an option exactly as
+          the page spells it (for example HIGH, BLOCK, ANONYMIZE), true or
+          false, or a list of documented names. Never a description such as
+          "filter strength" or "custom words and phrases".
+        - If the page lists the options but does not say which to use, pick
+          the option that fits the profile and quote the sentence that lists
+          the options. A number must appear in source_quote.
         - Every parameter name and value must be stated in, or be a direct
           reading of, source_quote. A script checks that source_quote is on
           source_url and a judge checks that it supports the parameters;
@@ -318,7 +337,7 @@ agents:
 
       INPUT: a "PROFILE:" line with a sanitized app profile (JSON) and a
       "CONTROLS:" block, one line per control:
-        <CONTROL-ID> | <category> | <name> | <description>
+        <CONTROL-ID> | <category> | <name> | <description> | keys: <allowed parameter keys>
       Work ONLY on the listed controls. Never add a control, never change a
       control id. If the CONTROLS block is empty, output [] and stop.
 
@@ -370,13 +389,22 @@ agents:
 
       OUTPUT: one JSON array and nothing else, no prose, no code fence:
       [{"control_id": "<id from CONTROLS>",
-        "parameters": {"<snake_case_name>": <string, number, boolean or list>},
+        "parameters": {"<a key from that control's keys list>": <string, number, boolean or list>},
         "rationale": "<one sentence: why this setting fits the profile>",
         "source_url": "<the exact page URL you fetched>",
         "source_quote": "<words copied character for character from that page, max 30 words>"}]
       You may output several objects for one control (one per source).
 
       NEVER INVENT PARAMETERS:
+        - Parameter names must come from the control's "keys:" list.
+          Anything else is rejected.
+        - Values must be concrete settings: a number, an option exactly as
+          the page spells it (for example HIGH, BLOCK, ANONYMIZE), true or
+          false, or a list of documented names. Never a description such as
+          "filter strength" or "custom words and phrases".
+        - If the page lists the options but does not say which to use, pick
+          the option that fits the profile and quote the sentence that lists
+          the options. A number must appear in source_quote.
         - Every parameter name and value must be stated in, or be a direct
           reading of, source_quote. A script checks that source_quote is on
           source_url and a judge checks that it supports the parameters;
@@ -413,7 +441,7 @@ agents:
 
       INPUT: a "PROFILE:" line with a sanitized app profile (JSON) and a
       "CONTROLS:" block, one line per control:
-        <CONTROL-ID> | <category> | <name> | <description>
+        <CONTROL-ID> | <category> | <name> | <description> | keys: <allowed parameter keys>
       Work ONLY on the listed controls. Never add a control, never change a
       control id. If the CONTROLS block is empty, output [] and stop.
 
@@ -440,9 +468,9 @@ agents:
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/fact-checking.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/agentic-security.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/configuration-reference.md
-        https://docs.paloaltonetworks.com/prisma-airs/getting-started/ai-runtime-security-overview
-        https://docs.paloaltonetworks.com/prisma-airs/ai-gateway/ai-gateway-overview
-        https://pan.dev/airs/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/airuntimesecurityapi/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/usecases/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/scan/scan-sync-request/
         https://genai.owasp.org/llm-top-10/
         https://genai.owasp.org/llmrisk/llm01-prompt-injection/
         https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/
@@ -461,13 +489,22 @@ agents:
 
       OUTPUT: one JSON array and nothing else, no prose, no code fence:
       [{"control_id": "<id from CONTROLS>",
-        "parameters": {"<snake_case_name>": <string, number, boolean or list>},
+        "parameters": {"<a key from that control's keys list>": <string, number, boolean or list>},
         "rationale": "<one sentence: why this setting fits the profile>",
         "source_url": "<the exact page URL you fetched>",
         "source_quote": "<words copied character for character from that page, max 30 words>"}]
       You may output several objects for one control (one per source).
 
       NEVER INVENT PARAMETERS:
+        - Parameter names must come from the control's "keys:" list.
+          Anything else is rejected.
+        - Values must be concrete settings: a number, an option exactly as
+          the page spells it (for example HIGH, BLOCK, ANONYMIZE), true or
+          false, or a list of documented names. Never a description such as
+          "filter strength" or "custom words and phrases".
+        - If the page lists the options but does not say which to use, pick
+          the option that fits the profile and quote the sentence that lists
+          the options. A number must appear in source_quote.
         - Every parameter name and value must be stated in, or be a direct
           reading of, source_quote. A script checks that source_quote is on
           source_url and a judge checks that it supports the parameters;
@@ -505,7 +542,7 @@ agents:
 
       INPUT: a "PROFILE:" line with a sanitized app profile (JSON) and a
       "CONTROLS:" block, one line per control:
-        <CONTROL-ID> | <category> | <name> | <description>
+        <CONTROL-ID> | <category> | <name> | <description> | keys: <allowed parameter keys>
       Work ONLY on the listed controls. Never add a control, never change a
       control id. If the CONTROLS block is empty, output [] and stop.
 
@@ -539,9 +576,9 @@ agents:
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/fact-checking.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/agentic-security.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/configuration-reference.md
-        https://docs.paloaltonetworks.com/prisma-airs/getting-started/ai-runtime-security-overview
-        https://docs.paloaltonetworks.com/prisma-airs/ai-gateway/ai-gateway-overview
-        https://pan.dev/airs/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/airuntimesecurityapi/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/usecases/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/scan/scan-sync-request/
         https://genai.owasp.org/llm-top-10/
         https://genai.owasp.org/llmrisk/llm01-prompt-injection/
         https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/
@@ -560,13 +597,22 @@ agents:
 
       OUTPUT: one JSON array and nothing else, no prose, no code fence:
       [{"control_id": "<id from CONTROLS>",
-        "parameters": {"<snake_case_name>": <string, number, boolean or list>},
+        "parameters": {"<a key from that control's keys list>": <string, number, boolean or list>},
         "rationale": "<one sentence: why this setting fits the profile>",
         "source_url": "<the exact page URL you fetched>",
         "source_quote": "<words copied character for character from that page, max 30 words>"}]
       You may output several objects for one control (one per source).
 
       NEVER INVENT PARAMETERS:
+        - Parameter names must come from the control's "keys:" list.
+          Anything else is rejected.
+        - Values must be concrete settings: a number, an option exactly as
+          the page spells it (for example HIGH, BLOCK, ANONYMIZE), true or
+          false, or a list of documented names. Never a description such as
+          "filter strength" or "custom words and phrases".
+        - If the page lists the options but does not say which to use, pick
+          the option that fits the profile and quote the sentence that lists
+          the options. A number must appear in source_quote.
         - Every parameter name and value must be stated in, or be a direct
           reading of, source_quote. A script checks that source_quote is on
           source_url and a judge checks that it supports the parameters;
@@ -603,7 +649,7 @@ agents:
 
       INPUT: a "PROFILE:" line with a sanitized app profile (JSON) and a
       "CONTROLS:" block, one line per control:
-        <CONTROL-ID> | <category> | <name> | <description>
+        <CONTROL-ID> | <category> | <name> | <description> | keys: <allowed parameter keys>
       Work ONLY on the listed controls. Never add a control, never change a
       control id. If the CONTROLS block is empty, output [] and stop.
 
@@ -630,9 +676,9 @@ agents:
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/fact-checking.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/agentic-security.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/configuration-reference.md
-        https://docs.paloaltonetworks.com/prisma-airs/getting-started/ai-runtime-security-overview
-        https://docs.paloaltonetworks.com/prisma-airs/ai-gateway/ai-gateway-overview
-        https://pan.dev/airs/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/airuntimesecurityapi/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/usecases/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/scan/scan-sync-request/
         https://genai.owasp.org/llm-top-10/
         https://genai.owasp.org/llmrisk/llm01-prompt-injection/
         https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/
@@ -651,13 +697,22 @@ agents:
 
       OUTPUT: one JSON array and nothing else, no prose, no code fence:
       [{"control_id": "<id from CONTROLS>",
-        "parameters": {"<snake_case_name>": <string, number, boolean or list>},
+        "parameters": {"<a key from that control's keys list>": <string, number, boolean or list>},
         "rationale": "<one sentence: why this setting fits the profile>",
         "source_url": "<the exact page URL you fetched>",
         "source_quote": "<words copied character for character from that page, max 30 words>"}]
       You may output several objects for one control (one per source).
 
       NEVER INVENT PARAMETERS:
+        - Parameter names must come from the control's "keys:" list.
+          Anything else is rejected.
+        - Values must be concrete settings: a number, an option exactly as
+          the page spells it (for example HIGH, BLOCK, ANONYMIZE), true or
+          false, or a list of documented names. Never a description such as
+          "filter strength" or "custom words and phrases".
+        - If the page lists the options but does not say which to use, pick
+          the option that fits the profile and quote the sentence that lists
+          the options. A number must appear in source_quote.
         - Every parameter name and value must be stated in, or be a direct
           reading of, source_quote. A script checks that source_quote is on
           source_url and a judge checks that it supports the parameters;
@@ -694,7 +749,7 @@ agents:
 
       INPUT: a "PROFILE:" line with a sanitized app profile (JSON) and a
       "CONTROLS:" block, one line per control:
-        <CONTROL-ID> | <category> | <name> | <description>
+        <CONTROL-ID> | <category> | <name> | <description> | keys: <allowed parameter keys>
       Work ONLY on the listed controls. Never add a control, never change a
       control id. If the CONTROLS block is empty, output [] and stop.
 
@@ -721,9 +776,9 @@ agents:
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/fact-checking.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog/agentic-security.md
         https://docs.nvidia.com/nemo/guardrails/configure-guardrails/configuration-reference.md
-        https://docs.paloaltonetworks.com/prisma-airs/getting-started/ai-runtime-security-overview
-        https://docs.paloaltonetworks.com/prisma-airs/ai-gateway/ai-gateway-overview
-        https://pan.dev/airs/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/airuntimesecurityapi/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/usecases/
+        https://pan.dev/prisma-airs/api/airuntimesecurity/scan/scan-sync-request/
         https://genai.owasp.org/llm-top-10/
         https://genai.owasp.org/llmrisk/llm01-prompt-injection/
         https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/
@@ -742,13 +797,22 @@ agents:
 
       OUTPUT: one JSON array and nothing else, no prose, no code fence:
       [{"control_id": "<id from CONTROLS>",
-        "parameters": {"<snake_case_name>": <string, number, boolean or list>},
+        "parameters": {"<a key from that control's keys list>": <string, number, boolean or list>},
         "rationale": "<one sentence: why this setting fits the profile>",
         "source_url": "<the exact page URL you fetched>",
         "source_quote": "<words copied character for character from that page, max 30 words>"}]
       You may output several objects for one control (one per source).
 
       NEVER INVENT PARAMETERS:
+        - Parameter names must come from the control's "keys:" list.
+          Anything else is rejected.
+        - Values must be concrete settings: a number, an option exactly as
+          the page spells it (for example HIGH, BLOCK, ANONYMIZE), true or
+          false, or a list of documented names. Never a description such as
+          "filter strength" or "custom words and phrases".
+        - If the page lists the options but does not say which to use, pick
+          the option that fits the profile and quote the sentence that lists
+          the options. A number must appear in source_quote.
         - Every parameter name and value must be stated in, or be a direct
           reading of, source_quote. A script checks that source_quote is on
           source_url and a judge checks that it supports the parameters;
@@ -781,9 +845,19 @@ agents:
       A script has ALREADY confirmed that every QUOTE appears on its URL.
       Decide only whether the QUOTE supports the PARAMETERS for that control.
 
+      PARAMETER NAMES are internal keys from our catalog (for example
+      prompt_attack_strength). They do not need to appear in the QUOTE.
+      Judge the VALUES and the setting they configure:
+        - a value is supported if the QUOTE states it, or lists it as one of
+          the options for that setting;
+        - a number is supported only if that number appears in the QUOTE for
+          that setting;
+        - a value that is a description instead of a concrete setting (for
+          example "filter strength") is UNSUPPORTED.
+
       Verdicts, exactly one per line:
-        SUPPORTED        - every parameter name and value is stated in, or is
-                           a direct reading of, the QUOTE, and it fits the control.
+        SUPPORTED        - every value is supported (see above) and the QUOTE is
+                           about the setting the parameter configures.
         PARTLY SUPPORTED - some parameters are supported, others are not, or a
                            value is stronger or more specific than the QUOTE.
                            Name the unsupported parameters in the NOTE.

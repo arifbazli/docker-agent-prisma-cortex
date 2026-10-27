@@ -127,12 +127,22 @@ class Parsing(unittest.TestCase):
             {"control_id": "INPUT-10", "parameters": {"x": 1}, "source_url": "http://x", "source_quote": "q"},
             {"control_id": "INPUT-10", "parameters": {"x": 1}, "source_url": url},
         ])
-        ok, bad = GR.parse_proposals(text, {"INPUT-10"})
+        ok, bad = GR.parse_proposals(text, {"INPUT-10": ["prompt_attack_strength", "x", "Bad Name"]})
         self.assertEqual(len(ok), 1)
         self.assertEqual(ok[0]["source_quote"], "set the strength")
-        self.assertEqual(len(bad), 6)
+        self.assertEqual(len(bad), 6, bad)
         self.assertIn("not assigned", bad[0]["reason"])
-        ok, bad = GR.parse_proposals("I could not find anything.", {"INPUT-10"})
+        ok, bad = GR.parse_proposals(json.dumps([{"control_id": "INPUT-10", "parameters": {"made_up_key": 1},
+                                                  "source_url": url, "source_quote": "q"}]), {"INPUT-10": ["x"]})
+        self.assertEqual(ok, [])
+        self.assertIn("not in allowed_parameter_keys", bad[0]["reason"])
+        broken = ('[{"control_id": "INPUT-10", "parameters": {"x": 1}, "source_url": "https://a", "source_quote": "q"},'
+                  '{"control_id": "INPUT-10", "parameters": {"x": 2}, "source_url": "https://a", "source_quote": "q",}]')
+        ok, bad = GR.parse_proposals(broken, {"INPUT-10": ["x"]})
+        self.assertEqual([o["parameters"] for o in ok], [{"x": 1}])
+        self.assertIn("1 proposal(s) in the output were not valid JSON", bad[0]["reason"])
+        self.assertEqual(GR.parse_proposals("```json\n[]\n```", {"INPUT-10": ["x"]}), ([], []))
+        ok, bad = GR.parse_proposals("I could not find anything.", {"INPUT-10": ["x"]})
         self.assertEqual((ok, len(bad)), ([], 1))
 
     def test_fact_line_goes_through_quote_check(self):

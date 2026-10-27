@@ -70,6 +70,14 @@ class Catalog(unittest.TestCase):
         for c in CATALOG["controls"]:
             self.assertTrue(any(t.startswith("LLM") for t in c["threats"]), f"{c['id']} has no OWASP id")
 
+    def test_allowed_parameter_keys(self):
+        for c in CATALOG["controls"]:
+            keys = c["allowed_parameter_keys"]
+            self.assertTrue(keys, c["id"])
+            self.assertEqual(len(keys), len(set(keys)), c["id"])
+            for k in keys:
+                self.assertRegex(k, r"^[a-z][a-z0-9_]{0,59}$")
+
     def test_generic_target_everywhere(self):
         for c in CATALOG["controls"]:
             self.assertIn("generic", c["supported_targets"], c["id"])
@@ -116,15 +124,18 @@ class Schemas(unittest.TestCase):
             "catalog_version": "1.0", "profile": SAMPLE_PROFILE,
             "controls": [{
                 "control_id": "INPUT-10", "category": "input", "name": "Injection screening", "severity": "high",
-                "enforcement_point": "pre_model", "targets": ["generic", "bedrock"], "status": "grounded",
+                "enforcement_point": "pre_model", "targets": ["generic", "bedrock"], "tier": "grounded",
                 "parameters": [{"name": "prompt_attack_strength", "value": "HIGH", "rationale": "Documented filter strength.",
                                 "source_url": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html",
                                 "source_quote": "prompt attack"}],
             }],
             "waivers": [{"category": "memory", "reason": "The application keeps no memory."}],
-            "excluded": [{"control_id": "TOOL-01", "reason": "has_tools is false"}],
+            "excluded": [{"control_id": "TOOL-01", "tier": "excluded", "reason": "has_tools is false"}],
         }
         self.assertEqual(V.validate(policy, SCHEMAS["policy"]), [])
+        bad_tier = json.loads(json.dumps(policy))
+        bad_tier["controls"][0]["tier"] = "vendor-backed"
+        self.assertTrue(any("tier" in e for e in V.validate(bad_tier, SCHEMAS["policy"])))
         policy["advisory"] = False
         policy["controls"][0]["parameters"][0]["source_url"] = "https://x/readme.md?ask=q"
         errors = V.validate(policy, SCHEMAS["policy"])
