@@ -147,26 +147,27 @@ python3 scripts/guardrail.py bench/guardrail/rag-chatbot.profile.json
 bench/guardrail/check-golden.sh
 ```
 
-### Measured grounding (3 runs per golden profile, default cloud models)
+### Measured grounding (4 runs per golden profile, default cloud models)
 
 Counting unit: **controls** (one grounded control = at least one vendor-grounded
 parameter; parameters and proposals are reported separately; results vary
 between runs). Ranges are min-max of grounded controls out of selected controls.
+All 12 committed runs in `bench/guardrail/results.tsv` are included.
 
 | Golden profile | Selected controls | Grounded runs (of selected) | Min-max grounded |
 |---|---|---|---|
-| `rag-chatbot.profile.json` | 47 of 70 (this profile only) | 4, 12, 7 | 4-12 |
-| `tool-agent.profile.json` | 36 of 70 | 4, 3, 3 | 3-4 |
-| `memory-assistant.profile.json` | 45 of 70 | 6, 5, 11 | 5-11 |
+| `rag-chatbot.profile.json` | 47 of 70 (this profile only) | 4, 12, 7, 9 | 4-12 |
+| `tool-agent.profile.json` | 36 of 70 | 4, 3, 3, 7 | 3-7 |
+| `memory-assistant.profile.json` | 45 of 70 | 6, 5, 11, 3 | 3-11 |
 
 `47 of 70` applies to the RAG-chatbot golden profile only; the other profiles select
-different subsets and exclusions. Runs above were captured at commit `899c855`;
-later commits on `guardrail-policy-generator` only add source-kind labelling and
-documentation, which do not change grounding. Most of a policy is `catalog-default` -
-an opinionated baseline from `recommended_defaults`, not vendor-backed. Golden-profile
-checks (`bench/guardrail/check-golden.sh`) pass; a mutation check on each run
-catches a removed control, a duplicate, a mistyped value, or a default trying to cite
-a source.
+different subsets and exclusions. Runs were captured at commits `899c855` and
+`4c4742d`; later commits on `guardrail-policy-generator` only add source-kind
+labelling and documentation, which do not change grounding. Most of a policy is
+`catalog-default` - an opinionated baseline from `recommended_defaults`, not
+vendor-backed. Golden-profile checks (`bench/guardrail/check-golden.sh`) pass; a
+mutation check on each run catches a removed control, a duplicate, a mistyped value,
+or a default trying to cite a source.
 
 ### Example output files
 
@@ -228,6 +229,9 @@ scripts/gen-tenant-config.sh && eval "$(scripts/prisma-login.sh)"
 docker-agent run --exec --env-from-file .env agents/tenant-readonly.local.yaml "List my cloud accounts in both tenants"
 ```
 
+`agents/tenant-readonly.local.yaml` is generated at runtime by `scripts/gen-tenant-config.sh`
+and is not tracked until it exists.
+
 Not yet tested against a live tenant. Tenant data is sent to the model provider.
 
 ## Making changes
@@ -248,7 +252,7 @@ bench/run-all.sh                                 # ~25 min, appends to bench/res
 git commit -am "..." && git push -u origin my-change   # open a PR; CI must pass
 ```
 
-Compare new `bench/.../results.tsv` rows with the previous ones before merging.
+Compare new rows in `bench/guardrail/results.tsv` with the previous ones before merging.
 Put expected answers in `bench/questions.txt`, not in prompts. Keep doc examples
 honest about what a single run proves.
 
