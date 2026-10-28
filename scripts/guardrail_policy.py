@@ -54,6 +54,7 @@ def build_policy(profile: dict, catalog: dict, selection: dict, grounded: list[d
                     continue
                 seen[name] = value
                 params.append({"name": name, "value": value, "basis": "vendor-grounded",
+                               "source_kind": g.get("source_kind", "other"),
                                "rationale": g["rationale"] or "Documented setting.",
                                "source_url": g["source_url"], "source_quote": g["source_quote"]})
         vendor = bool(params)
@@ -204,6 +205,13 @@ def exceptions_md(policy: dict, catalog: dict, dropped: list[dict], failed: list
     if mixed:
         out += ["", "Grounded controls that also carry catalog defaults for other keys:", ""]
         out += [f"- `{c['control_id']}` {p['name']}={_cell(json.dumps(p['value']))} (catalog-default, not vendor-backed)" for c, p in mixed]
+    example_params = [(c, p) for c in tiers["grounded"] for p in c["parameters"]
+                      if p["basis"] == "vendor-grounded" and p.get("source_kind") == "example-config"]
+    if example_params:
+        out += ["", "## Vendor values taken from example/sample config blocks", "",
+                "These values are taken from vendor documentation examples. They are not recommendations:", ""]
+        out += [f"- `{c['control_id']}` `{p['name']}` = `{json.dumps(p['value'])}` "
+                f"(example from vendor docs, not a recommendation) - {_cell(p.get('source_url',''))}" for c, p in example_params]
     out += ["", "## Dropped proposals", "",
             "Every proposal that did not make it into policy.json, and why.", ""]
     if dropped:

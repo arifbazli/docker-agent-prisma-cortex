@@ -154,8 +154,14 @@ agents:
         "value": <value in the key's type, or null>,
         "rationale": "<one sentence: why this value fits the profile>",
         "source_url": "<the URL of the page that states it>",
-        "source_quote": "<words copied character for character from that page, max 30 words>"}]
-      For a null value, source_url and source_quote may be empty strings.
+        "source_quote": "<words copied character for character from that page, max 30 words>",
+        "source_kind": "<one of: documented-default | documented-limit-or-enum | example-config | other>"}]
+      For a null value, source_url and source_quote may be empty strings and source_kind "other".
+      source_kind tells a human how the value was chosen:
+        - documented-default: the page states the default for the setting
+        - documented-limit-or-enum: the page lists the limits or allowed options and you chose one
+        - example-config: the value only appears inside an example or sample config block on the page
+        - other: none of the above
 
       RULES (a script enforces them before any judge sees your answer):
         - The value must match the key's type: boolean is true/false,
@@ -169,6 +175,10 @@ agents:
           and a judge checks that it supports the value.
         - Do not use defaults from memory or from other products. If the
           page does not say, answer null.
+        - Classify the value honestly. If it only appears in an example or
+          sample configuration block, use example-config. An example value is
+          NOT a recommendation. A script overrides the classification to
+          example-config whenever the quote sits in such a block.
         - source_url must be a page you were given or fetched, without "?".
         - Use profile facts only to choose among documented options.
     toolsets:

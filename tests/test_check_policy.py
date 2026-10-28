@@ -147,3 +147,26 @@ class Repo(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SourceKind(unittest.TestCase):
+    def test_example_marker_forces_example_config(self):
+        body = "Rails config:\n```\nrails.config.jailbreak_detection.length_per_perplexity_threshold 89.79\n```\n"
+        self.assertEqual(GR.classify_source_kind("89.79", body + "sample config below", "documented-limit-or-enum"),
+                         "example-config")
+
+    def test_threshold_from_example_block(self):
+        # NeMo jailbreak thresholds copied from an example config block.
+        body = ("reference:\n```\nrails.config.jailbreak_detection.length_per_perplexity_threshold    | float | 89.79\n"
+                "rails.config.jailbreak_detection.prefix_suffix_perplexity_threshold | float | 1845.65\n```\n")
+        self.assertEqual(GR.classify_source_kind("89.79", body, "documented-limit-or-enum"), "example-config")
+        self.assertEqual(GR.classify_source_kind("1845.65", body, "documented-default"), "example-config")
+
+    def test_no_marker_keeps_specialist_kind(self):
+        body = "Set the grounding threshold to 0.7 in the console."
+        self.assertEqual(GR.classify_source_kind("0.7", body, "documented-limit-or-enum"), "documented-limit-or-enum")
+
+    def test_missing_page_defaults_other(self):
+        self.assertEqual(GR.classify_source_kind("0.7", None, "bogus"), "other")
+
+

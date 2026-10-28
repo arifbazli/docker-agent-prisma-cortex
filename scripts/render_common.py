@@ -30,8 +30,8 @@ def report_md(target: str, policy: dict, mapped: list[dict], unsupported: list[d
            "> Values with basis catalog-default are an opinionated baseline, NOT vendor-backed.", "",
            "## Mapped to real target fields", ""]
     if mapped:
-        out += ["| Control | Tier | Parameter | Basis | Value | Target field |", "|---|---|---|---|---|---|"]
-        out += [f"| `{m['control_id']}` | {m['tier']} | `{m['parameter']}` | {basis_text(m['basis'])} | `{json.dumps(m['value'])}` | `{m['field']}` |"
+        out += ["| Control | Tier | Parameter | Basis | Source kind | Value | Target field |", "|---|---|---|---|---|---|---|"]
+        out += [f"| `{m['control_id']}` | {m['tier']} | `{m['parameter']}` | {basis_text(m['basis'])} | {source_kind_text(m.get('source_kind'))} | `{json.dumps(m['value'])}` | `{m['field']}` |"
                 for m in mapped]
     else:
         out.append("Nothing in this policy maps to a native field of the target.")
@@ -44,6 +44,14 @@ def report_md(target: str, policy: dict, mapped: list[dict], unsupported: list[d
     return "\n".join(out) + "\n"
 
 
+def source_kind_text(kind) -> str:
+    if not kind:
+        return "-"
+    if kind == "example-config":
+        return "example-config (example from vendor docs, not a recommendation)"
+    return kind
+
+
 def basis_text(basis: str) -> str:
     return {"vendor-grounded": "vendor-grounded",
             "catalog-default": "catalog-default (opinionated baseline, NOT vendor-backed)"}.get(basis, basis)
@@ -51,7 +59,7 @@ def basis_text(basis: str) -> str:
 
 def mapped_row(c: dict, p: dict, field: str, value=None) -> dict:
     return {"control_id": c["control_id"], "tier": c["tier"], "parameter": p["name"], "basis": p["basis"],
-            "value": p["value"] if value is None else value, "field": field}
+            "source_kind": p.get("source_kind"), "value": p["value"] if value is None else value, "field": field}
 
 
 def walk(policy: dict):
