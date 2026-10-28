@@ -55,32 +55,6 @@ Amber steps (LLM) and their model settings:
 
 Legend: amber = cloud LLM step, blue = script, grey = data.
 
-<details>
-<summary>Mermaid source</summary>
-
-```mermaid
-flowchart LR
-    Profile["sanitized app profile"]:::data --> Select["select-controls.py"]:::script
-    Catalog["guardrail-catalog.json<br/>70 controls"]:::data --> Select
-    Select --> Spec["7 category specialists<br/>SPECIALIST_MODEL"]:::llm
-    Spec --> Values["value-type check"]:::script
-    Values --> Quote["quote check on fetched page"]:::script
-    Quote --> Judge["judge<br/>JUDGE_MODEL"]:::llm
-    Judge --> Policy["policy.json"]:::data
-    Policy --> Asm["assembler: tests<br/>REVIEWER_MODEL"]:::llm
-    Policy --> Render["render-bedrock / render-nemo"]:::script
-    Policy --> Check["check-policy.py"]:::script
-
-    classDef script fill:#2563eb,color:#fff,stroke:#1e40af
-    classDef llm fill:#f59e0b,color:#000,stroke:#b45309
-    classDef data fill:#9ca3af,color:#000,stroke:#6b7280
-```
-
-</details>
-
-
-Blue = script, amber = LLM step (with its model variable), grey = data.
-
 - Scripts select the controls and verify that each quote is on the cited page.
 - LLMs only propose parameter values and write tests.
 - A judge from a different model family checks that the quote supports the value.
