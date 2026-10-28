@@ -73,7 +73,7 @@ def text_block(x, y, w, h, lines, fill, font_size=12):
 
 def make_svg(nodes, edges, legend, height=420):
     parts = []
-    parts.append(f'<svg viewBox="0 0 {WIDTH} {height}" '
+    parts.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {height}" '
                  f'width="{WIDTH}" height="{height}" role="img">')
     parts.append(f'  <rect width="{WIDTH}" height="{height}" fill="#ffffff"/>')
     # arrows first so boxes paint over
