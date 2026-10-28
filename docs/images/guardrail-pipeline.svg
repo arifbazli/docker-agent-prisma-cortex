@@ -1,73 +1,63 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" role="img">
-  <rect width="1000" height="400" fill="#ffffff"/>
-  <defs>    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth">      <path d="M0,0 L0,7 L9,3.5 z" fill="#555555"/>    </marker>  </defs>
-  <line x1="120" y1="44" x2="140" y2="94" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="120" y1="110" x2="140" y2="94" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="252" y1="94" x2="258" y2="97" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="358" y1="97" x2="364" y2="94" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="464" y1="94" x2="470" y2="94" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="570" y1="94" x2="576" y2="94" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="652" y1="94" x2="658" y2="97" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="758" y1="97" x2="764" y2="94" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="864" y1="94" x2="870" y2="94" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="982" y1="94" x2="740" y2="204" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="982" y1="94" x2="852" y2="204" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="982" y1="94" x2="740" y2="268" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="982" y1="94" x2="852" y2="268" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="840" y1="204" x2="800" y2="354" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <rect x="20" y="20" width="100" height="48" rx="8" ry="8" fill="#9ca3af" stroke="#333333" stroke-width="1.5"/>
-  <text x="70" y="41" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">sanitized
-    <tspan x="70" dy="15">app profile</tspan>
-  </text>
-  <rect x="20" y="86" width="100" height="48" rx="8" ry="8" fill="#9ca3af" stroke="#333333" stroke-width="1.5"/>
-  <text x="70" y="107" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">guardrail-
-    <tspan x="70" dy="15">catalog.json</tspan>
-  </text>
-  <rect x="140" y="70" width="112" height="48" rx="8" ry="8" fill="#2563eb" stroke="#333333" stroke-width="1.5"/>
-  <text x="196" y="98" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#ffffff">select-controls.py</text>
-  <rect x="258" y="70" width="100" height="54" rx="8" ry="8" fill="#f59e0b" stroke="#333333" stroke-width="1.5"/>
-  <text x="308" y="86" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">7 category
-    <tspan x="308" dy="15">specialists</tspan>
-    <tspan x="308" dy="15">SPECIALIST_MODEL</tspan>
-  </text>
-  <rect x="364" y="70" width="100" height="48" rx="8" ry="8" fill="#2563eb" stroke="#333333" stroke-width="1.5"/>
-  <text x="414" y="98" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#ffffff">value-type check</text>
-  <rect x="470" y="70" width="100" height="48" rx="8" ry="8" fill="#2563eb" stroke="#333333" stroke-width="1.5"/>
-  <text x="520" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#ffffff">quote check
-    <tspan x="520" dy="15">on fetched page</tspan>
-  </text>
-  <rect x="576" y="70" width="76" height="48" rx="8" ry="8" fill="#f59e0b" stroke="#333333" stroke-width="1.5"/>
-  <text x="614" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">judge
-    <tspan x="614" dy="15">JUDGE_MODEL</tspan>
-  </text>
-  <rect x="658" y="70" width="100" height="54" rx="8" ry="8" fill="#f59e0b" stroke="#333333" stroke-width="1.5"/>
-  <text x="708" y="86" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">assembler
-    <tspan x="708" dy="15">writes tests</tspan>
-    <tspan x="708" dy="15">REVIEWER_MODEL</tspan>
-  </text>
-  <rect x="764" y="70" width="100" height="48" rx="8" ry="8" fill="#f59e0b" stroke="#333333" stroke-width="1.5"/>
-  <text x="814" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">reviewer
-    <tspan x="814" dy="15">REVIEWER_MODEL</tspan>
-  </text>
-  <rect x="870" y="70" width="112" height="48" rx="8" ry="8" fill="#2563eb" stroke="#333333" stroke-width="1.5"/>
-  <text x="926" y="98" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#ffffff">check-policy.py</text>
-  <rect x="740" y="180" width="100" height="48" rx="8" ry="8" fill="#9ca3af" stroke="#333333" stroke-width="1.5"/>
-  <text x="790" y="208" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">policy.json</text>
-  <rect x="852" y="180" width="100" height="48" rx="8" ry="8" fill="#9ca3af" stroke="#333333" stroke-width="1.5"/>
-  <text x="902" y="208" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">exceptions.md</text>
-  <rect x="740" y="244" width="100" height="48" rx="8" ry="8" fill="#9ca3af" stroke="#333333" stroke-width="1.5"/>
-  <text x="790" y="272" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">tests.jsonl</text>
-  <rect x="852" y="244" width="100" height="48" rx="8" ry="8" fill="#9ca3af" stroke="#333333" stroke-width="1.5"/>
-  <text x="902" y="272" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">evidence.json</text>
-  <rect x="800" y="330" width="120" height="48" rx="8" ry="8" fill="#2563eb" stroke="#333333" stroke-width="1.5"/>
-  <text x="860" y="351" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#ffffff">render-bedrock
-    <tspan x="860" dy="15">and render-nemo</tspan>
-  </text>
-  <rect x="10" y="358" width="16" height="16" rx="3" ry="3" fill="#9ca3af" stroke="#333333" stroke-width="1"/>
-  <text x="32" y="371" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">data</text>
-  <rect x="80" y="358" width="16" height="16" rx="3" ry="3" fill="#2563eb" stroke="#333333" stroke-width="1"/>
-  <text x="102" y="371" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">script (blue)</text>
-  <rect x="200" y="358" width="16" height="16" rx="3" ry="3" fill="#f59e0b" stroke="#333333" stroke-width="1"/>
-  <text x="222" y="371" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">cloud LLM step (amber)</text>
-  <text x="440" y="371" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">Grey data, blue script, amber cloud LLM. Inputs/outputs are files.</text>
+  <rect x="0" y="0" width="1000" height="400" fill="#ffffff"/>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#374151"/>
+    </marker>
+  </defs>
+  <line x1="150.0" y1="59.9" x2="190.0" y2="68.4" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="150.0" y1="118.7" x2="190.0" y2="108.0" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="355.0" y1="89.3" x2="395.0" y2="91.0" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="545.0" y1="90.6" x2="585.0" y2="88.7" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="705.0" y1="86.0" x2="750.0" y2="86.0" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="820.0" y1="112.0" x2="820.0" y2="190.0" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="750.0" y1="219.2" x2="710.0" y2="221.0" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="580.0" y1="220.9" x2="540.0" y2="219.1" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="410.0" y1="216.0" x2="375.0" y2="216.0" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="235.0" y1="217.3" x2="150.0" y2="218.8" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="150.0" y1="254.4" x2="235.9" y2="300.0" stroke="#374151" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <rect x="20" y="20" width="130" height="52" rx="8" ry="8" fill="#9ca3af" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="85" y="42.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#000000">sanitized</text>
+  <text x="85" y="58.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">app profile</text>
+  <rect x="20" y="110" width="130" height="52" rx="8" ry="8" fill="#9ca3af" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="85" y="132.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#000000">guardrail-</text>
+  <text x="85" y="148.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">catalog.json</text>
+  <rect x="190" y="60" width="165" height="52" rx="8" ry="8" fill="#2563eb" stroke="#1e40af" stroke-width="1.5"/>
+  <text x="272" y="90.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">select-controls.py</text>
+  <rect x="395" y="60" width="150" height="68" rx="8" ry="8" fill="#f59e0b" stroke="#b45309" stroke-width="1.5"/>
+  <text x="470" y="82.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#000000">7 category</text>
+  <text x="470" y="98.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">specialists</text>
+  <text x="470" y="114.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">SPECIALIST_MODEL</text>
+  <rect x="585" y="60" width="120" height="52" rx="8" ry="8" fill="#2563eb" stroke="#1e40af" stroke-width="1.5"/>
+  <text x="645" y="82.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">value-type</text>
+  <text x="645" y="98.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#ffffff">check</text>
+  <rect x="750" y="60" width="140" height="52" rx="8" ry="8" fill="#2563eb" stroke="#1e40af" stroke-width="1.5"/>
+  <text x="820" y="82.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">quote check on</text>
+  <text x="820" y="98.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#ffffff">fetched page</text>
+  <rect x="750" y="190" width="140" height="52" rx="8" ry="8" fill="#f59e0b" stroke="#b45309" stroke-width="1.5"/>
+  <text x="820" y="212.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#000000">judge</text>
+  <text x="820" y="228.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">JUDGE_MODEL</text>
+  <rect x="580" y="190" width="130" height="68" rx="8" ry="8" fill="#f59e0b" stroke="#b45309" stroke-width="1.5"/>
+  <text x="645" y="212.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#000000">assembler</text>
+  <text x="645" y="228.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">writes tests</text>
+  <text x="645" y="244.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">REVIEWER_MODEL</text>
+  <rect x="410" y="190" width="130" height="52" rx="8" ry="8" fill="#f59e0b" stroke="#b45309" stroke-width="1.5"/>
+  <text x="475" y="212.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#000000">reviewer</text>
+  <text x="475" y="228.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">REVIEWER_MODEL</text>
+  <rect x="235" y="190" width="140" height="52" rx="8" ry="8" fill="#2563eb" stroke="#1e40af" stroke-width="1.5"/>
+  <text x="305" y="220.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">check-policy.py</text>
+  <rect x="20" y="178" width="130" height="84" rx="8" ry="8" fill="#9ca3af" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="85" y="200.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#000000">policy.json</text>
+  <text x="85" y="216.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">exceptions.md</text>
+  <text x="85" y="232.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">tests.jsonl</text>
+  <text x="85" y="248.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">evidence.json</text>
+  <rect x="200" y="300" width="170" height="52" rx="8" ry="8" fill="#2563eb" stroke="#1e40af" stroke-width="1.5"/>
+  <text x="285" y="322.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">render-bedrock</text>
+  <text x="285" y="338.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#ffffff">and render-nemo</text>
+  <rect x="20" y="370" width="16" height="16" rx="3" ry="3" fill="#9ca3af" stroke="#6b7280" stroke-width="1"/>
+  <text x="42" y="383" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">data</text>
+  <rect x="150" y="370" width="16" height="16" rx="3" ry="3" fill="#2563eb" stroke="#1e40af" stroke-width="1"/>
+  <text x="172" y="383" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">script</text>
+  <rect x="280" y="370" width="16" height="16" rx="3" ry="3" fill="#f59e0b" stroke="#b45309" stroke-width="1"/>
+  <text x="302" y="383" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">cloud LLM step (model setting)</text>
 </svg>
