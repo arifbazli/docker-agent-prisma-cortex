@@ -45,50 +45,34 @@ A live guardrail run takes several minutes per profile; a briefing takes a few m
 
 ```mermaid
 flowchart LR
-    Profile[app profile]
-    Catalog[guardrail catalog]
-    Select[select controls]
-    Spec[category specialists]
-    Values[value type check]
-    Quote[quote check]
-    Judge[judge]
-    Policy[policy json]
-    Asm[assembler tests]
-    Render[render files]
-    Check[check policy]
+    Profile[sanitized app profile] --> Select[select-controls.py]
+    Catalog[guardrail-catalog.json] --> Select
+    Select --> Spec[7 category specialists]
+    Spec --> Values[value-type check]
+    Values --> Quote[quote check on fetched page]
+    Quote --> Judge[judge]
+    Judge --> Policy[policy.json]
+    Policy --> Asm[assembler writes tests]
+    Policy --> Render[render-bedrock and render-nemo]
+    Policy --> Check[check-policy.py]
 
-    Profile --> Select
-    Catalog --> Select
-    Select --> Spec
-    Spec --> Values
-    Values --> Quote
-    Quote --> Judge
-    Judge --> Policy
-    Policy --> Asm
-    Policy --> Render
-    Policy --> Check
-
+    classDef data fill:#9ca3af,color:#000,stroke:#6b7280
     classDef script fill:#2563eb,color:#fff,stroke:#1e40af
     classDef ai fill:#f59e0b,color:#000,stroke:#b45309
-    classDef data fill:#9ca3af,color:#000,stroke:#6b7280
+    class Profile,Catalog,Policy data
     class Select,Values,Quote,Render,Check script
     class Spec,Judge,Asm ai
-    class Profile,Catalog,Policy data
 ```
 
 Amber steps (LLM) and their model settings:
 
 | Amber step | Model setting |
 |---|---|
-| category specialists | `SPECIALIST_MODEL` |
-| judge | `JUDGE_MODEL` |
-| assembler tests | `REVIEWER_MODEL` |
+| Specialists | SPECIALIST_MODEL |
+| Judge | JUDGE_MODEL |
+| Assembler | REVIEWER_MODEL |
 
-Blue = script, amber = LLM step (with its model variable), grey = data.
-
-- Scripts select the controls and verify that each quote is on the cited page.
-- LLMs only propose parameter values and write tests.
-- A judge from a different model family checks that the quote supports the value.
+Legend: amber = cloud LLM step, blue = script, grey = data.
 
 More diagrams: [docs/architecture.md](docs/architecture.md). Details: [docs/guardrail-generator.md](docs/guardrail-generator.md).
 
