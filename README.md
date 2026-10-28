@@ -1,282 +1,202 @@
 # docker-agent-prisma-cortex
 
-> Independent project. **Not affiliated with** Palo Alto Networks, Docker, NVIDIA,
-> AWS, OWASP or MITRE. Prisma Cloud, Cortex Cloud, Pan.dev, NVIDIA NeMo,
-> Amazon Bedrock, OWASP (including the LLM Top 10) and MITRE ATLAS are
-> trademarks or projects of their respective owners; links below point at the
-> official sources.
+Generate advisory, source-cited AI guardrail policies, and answer Prisma Cloud / Cortex Cloud questions from official documentation.
 
-Two small toolkits that sit on top of [docker-agent](https://github.com/docker/docker-agent)
-and [Ollama](https://ollama.com) cloud models:
+> Independent project. Not affiliated with Palo Alto Networks, Docker, NVIDIA, AWS, OWASP or MITRE.
 
-- **Docs briefing pipeline** - answers a question about Prisma Cloud / Cortex Cloud
-  from official documentation, with every statement tied to a quote a script
-  checked against the page.
-- **Guardrail policy generator** - turns a *sanitized* app profile into an
-  advisory guardrail policy (`policy.json`), per-control tests, and
-  Bedrock / NeMo renderings.
+## What this is
 
-![Example run: Prisma Cloud to Cortex Cloud migration briefing](docs/images/example-run.png)
+Two command-line tools on one shared engine ([docker-agent](https://github.com/docker/docker-agent), Ollama cloud models, a script quote check and a cross-family judge):
 
-```mermaid
-flowchart TB
-    subgraph Docs["Docs briefing pipeline (scripts/run.sh)"]
-        Q["question"] --> R["researcher (LLM)"] --> QC["quote check (script)"]
-        QC --> J["judge (LLM)"] --> W["writer (LLM)"] --> BR["briefing.md"]
-    end
-    subgraph Gd["Guardrail policy generator (scripts/guardrail.py)"]
-        P["sanitized profile"] --> S["select (script)"] --> Sp["specialists (LLM)"]
-        Sp --> Q2["quote check (script)"] --> J2["judge (LLM)"]
-        J2 --> Pol["policy.json + tests + renderers"]
-    end
-```
+- **Guardrail policy generator.** Turns a sanitized app profile into an advisory `policy.json`, tests and Bedrock / NeMo drafts. Each value is marked as vendor-grounded or as a catalog default.
+- **Docs briefing.** Answers a Prisma Cloud / Cortex Cloud question with a short briefing in which every statement cites an official page.
 
-## Cloud-only note (both toolkits)
+## Requirements and cloud-only
 
-All default models end in `:cloud` and run on `ollama.com`. You need:
+- `bash`, `curl`, `python3` 3.9+ (standard library only)
+- [docker-agent](https://github.com/docker/docker-agent/releases) 1.152+
+- [Ollama](https://ollama.com/download), signed in with `ollama signin`, and internet access
 
-- `ollama signin` (or `OLLAMA_API_KEY` set), and internet access.
-- Any input you send, including profiles, briefings and URLs, is sent to the
-  model provider. **Use sanitized profiles only** - no secrets, customer or
-  tenant data.
-- Local models are refused (`local models are disabled; use a cloud model`) unless
-  `ALLOW_LOCAL_MODELS=1` is explicitly set in the environment by you.
+All models run on Ollama cloud; model names end in `:cloud` or `-cloud`. Nothing is downloaded locally. A startup guard rejects local models (exit 64) unless you set `ALLOW_LOCAL_MODELS=1`; it is off by default. Prompts and profiles are sent to ollama.com, so use sanitized profiles only: no secrets, customer or tenant data.
 
----
-
-## Docs briefing pipeline
-
-Ask about Prisma Cloud or Cortex Cloud (especially migrating from Prisma Cloud
-to Cortex Cloud) and get a short briefing built only from official documentation.
-Every statement cites a page. About 1-3 minutes per question.
-
-### Quick start
-
-Needs `bash`, `curl`, `python3` 3.9+,
-[docker-agent](https://github.com/docker/docker-agent/releases) 1.152+ and
-[Ollama](https://ollama.com/download).
+## Quick start (no model calls)
 
 ```bash
-ollama signin
-git clone https://github.com/arifbazli/docker-agent-prisma-cortex.git && cd docker-agent-prisma-cortex
+git clone https://github.com/arifbazli/docker-agent-prisma-cortex.git
+cd docker-agent-prisma-cortex
 cp .env.example .env
 python3 -m unittest discover -s tests
-scripts/run.sh "Why migrate from Prisma Cloud to Cortex Cloud?"
+python3 scripts/guardrail.py --no-llm bench/guardrail/rag-chatbot.profile.json
+ls "$(cat outputs/.last-guardrail)"
 ```
 
-More examples:
+`--no-llm` builds the policy from catalog defaults only (every selected control is `catalog-default`), then runs the renderers and `scripts/check-policy.py`. Outputs land in `outputs/<timestamp>-guardrail-<profile>/`; `outputs/.last-guardrail` holds the latest path. `--dry-run` prints the selected controls and specialist prompts without calling a model.
 
-```bash
-CFG=agents/cortex-cloud-hub.yaml scripts/run.sh "What does Cortex Cloud AI-SPM monitor?"
-JUDGE_MODEL=gpt-oss:20b-cloud scripts/run.sh "How do I authenticate to the Cortex Cloud API?"
-```
-
-### Example output
-
-`**Output:**` the briefing is printed and saved to `outputs/<run>.md`.
-`outputs/<run>.evidence.json` holds each fact, quote and verdict.
-Check **To confirm** items yourself. One-line special results: `OUT OF SCOPE`,
-`NO FACTS FOUND`, `BRIEFING FAILED` (see `logs/`). Exit codes: `0` ok,
-`1` failed checks, `2` step failed.
-
-### Docker
-
-```bash
-cp .env.example .env && printf 'HOST_UID=%s\nHOST_GID=%s\n' "$(id -u)" "$(id -g)" >> .env
-mkdir -p outputs logs fetched
-docker compose run --rm --build agent "Why migrate from Prisma Cloud to Cortex Cloud?"
-```
-
-Uses Ollama on the host. Prebuilt image:
-`ghcr.io/arifbazli/docker-agent-prisma-cortex:latest`. See [`compose.yaml`](compose.yaml)
-to run Ollama in a container.
-
-### Settings
-
-Set in `.env` or on the command line (the command line wins).
-
-| Variable | Default |
-|---|---|
-| `OLLAMA_BASE_URL` | `http://localhost:11434/v1` |
-| `RESEARCH_MODEL` / `WRITER_MODEL` / `ROUTER_MODEL` | `nemotron-3-super:cloud` |
-| `JUDGE_MODEL` | `gpt-oss:120b-cloud` |
-| `CFG` | `agents/prisma-cortex-hub.yaml` |
-| `MODE` | `pipeline` (`agent` = run everything inside docker-agent) |
-| `SAFETY` | `restricted` |
-
----
-
-## Guardrail policy generator
-
-Generates a `policy.json` for an app profile by (a) selecting the applicable
-controls from the 70-control catalog, (b) grounding each parameter in vendor
-documentation with an evidence tier, and (c) rendering Bedrock and NeMo drafts.
-
-Strengths of the approach:
-
-- **Deterministic control selection.** `select-controls.py` evaluates each catalog
-  control's rule against the profile; no model decides which controls apply.
-- **Coverage with explicit waivers.** Every category is covered or waived with a
-  reason; no silent gaps.
-- **Per-control tests.** Each selected control gets at least one test case.
-- **Evidence tiers.** A control is `grounded` only when a vendor quote survived
-  the quote check and a cross-family judge, `catalog-default` when only the
-  catalog baseline is used. The output never hides which is which.
-- **Renderers refuse unsupported values.** Bedrock and NeMo drafts only contain
-  values that map to a real target field; everything else is listed as not rendered.
-- **Advisory output.** `policy.json` carries `advisory: true`; nothing is claimed to
-  be safe to deploy without review.
-
-### Quick start
-
-```bash
-git clone https://github.com/arifbazli/docker-agent-prisma-cortex.git && cd docker-agent-prisma-cortex
-cp .env.example .env
-python3 scripts/gen-configs.py
-python3 -m unittest discover -s tests
-python3 scripts/guardrail.py --no-llm bench/guardrail/rag-chatbot.profile.json   # no model calls
-python3 scripts/check-policy.py "$(cat outputs/.last-guardrail)/policy.json" \
-  --tests "$(cat outputs/.last-guardrail)/tests.jsonl" \
-  --expected bench/guardrail/rag-chatbot.expected.json
-```
-
-With cloud models (uses the models in `.env`):
+### With models
 
 ```bash
 python3 scripts/guardrail.py bench/guardrail/rag-chatbot.profile.json
-bench/guardrail/check-golden.sh
+scripts/run.sh "Why migrate from Prisma Cloud to Cortex Cloud?"
 ```
 
-### Measured grounding (4 runs per golden profile, default cloud models)
+A live guardrail run takes several minutes per profile; a briefing takes a few minutes.
 
-Counting unit: **controls** (one grounded control = at least one vendor-grounded
-parameter; parameters and proposals are reported separately; results vary
-between runs). Ranges are min-max of grounded controls out of selected controls.
-All 12 committed runs in `bench/guardrail/results.tsv` are included.
+## How it works
 
-| Golden profile | Selected controls | Grounded runs (of selected) | Min-max grounded |
-|---|---|---|---|
-| `rag-chatbot.profile.json` | 47 of 70 (this profile only) | 4, 12, 7, 9 | 4-12 |
-| `tool-agent.profile.json` | 36 of 70 | 4, 3, 3, 7 | 3-7 |
-| `memory-assistant.profile.json` | 45 of 70 | 6, 5, 11, 3 | 3-11 |
+```mermaid
+flowchart LR
+    Profile["sanitized app profile"]:::data --> Select["select-controls.py"]:::script
+    Catalog["guardrail-catalog.json<br/>70 controls"]:::data --> Select
+    Select --> Spec["7 category specialists<br/>SPECIALIST_MODEL"]:::llm
+    Spec --> Values["value-type check"]:::script
+    Values --> Quote["quote check on fetched page"]:::script
+    Quote --> Judge["judge<br/>JUDGE_MODEL"]:::llm
+    Judge --> Policy["policy.json"]:::data
+    Policy --> Asm["assembler: tests<br/>REVIEWER_MODEL"]:::llm
+    Policy --> Render["render-bedrock / render-nemo"]:::script
+    Policy --> Check["check-policy.py"]:::script
 
-`47 of 70` applies to the RAG-chatbot golden profile only; the other profiles select
-different subsets and exclusions. Runs were captured at commits `899c855` and
-`4c4742d`; later commits on `guardrail-policy-generator` only add source-kind
-labelling and documentation, which do not change grounding. Most of a policy is
-`catalog-default` - an opinionated baseline from `recommended_defaults`, not
-vendor-backed. Golden-profile checks (`bench/guardrail/check-golden.sh`) pass; a
-mutation check on each run catches a removed control, a duplicate, a mistyped value,
-or a default trying to cite a source.
+    classDef script fill:#2563eb,color:#fff,stroke:#1e40af
+    classDef llm fill:#f59e0b,color:#000,stroke:#b45309
+    classDef data fill:#9ca3af,color:#000,stroke:#6b7280
+```
 
-### Example output files
+Blue = script, amber = LLM step (with its model variable), grey = data.
 
-Under `outputs/<run>/`:
+- Scripts select the controls and verify that each quote is on the cited page.
+- LLMs only propose parameter values and write tests.
+- A judge from a different model family checks that the quote supports the value.
 
-- `policy.json` - canonical, schema-validated, with evidence tiers and source kinds
-- `exceptions.md` - tiers, waivers, dropped proposals and why, reviewer findings
-- `tests.jsonl` - at least one test per selected control
-- `bedrock-guardrail.json` / `bedrock-report.md`
-- `nemo-config.yml` / `nemo-report.md`
-- `review.json`, `evidence.json`
+More diagrams: [docs/architecture.md](docs/architecture.md). Details: [docs/guardrail-generator.md](docs/guardrail-generator.md).
 
-### Limitations
+## Example output
 
-- Output is **advisory**. A human must review every control, parameter and test
-  before use.
-- **Grounding variance.** Cloud model output varies between runs (see ranges above);
-  treat a single run as a draft.
-- **Example-config values are not recommendations.** When a value is taken from a
-  vendor example block (`source_kind: example-config`), it is labelled
-  `example from vendor docs, not a recommendation`.
-- **The judge can pass weak values.** Value-type checks (type, range, enum, and
-  number-in-quote) reduce this but do not eliminate it.
-- **Partly supported proposals are dropped** rather than partially applied.
-- **Bedrock denied topics** need a human-written definition per topic.
-- **ATLAS links** point at the site root (no stable deep links).
-- **Prisma AIRS grounding is thin** (documentation lives behind JavaScript rendering;
-  we use the pan.dev source).
-- `catalog-default` values are an opinionated baseline, not vendor-backed. Review
-  each one, especially where no `recommended_defaults` entry exists (the renderer
-  lists those as `configure by hand`).
+Trimmed from a live run on the `rag-chatbot` golden profile (`policy.json`):
 
-### Settings (guardrail)
+```json
+{
+  "control_id": "INPUT-10",
+  "name": "Injection screening",
+  "tier": "grounded",
+  "parameters": [
+    {
+      "name": "prompt_attack_strength",
+      "value": "LOW",
+      "basis": "vendor-grounded",
+      "source_kind": "documented-limit-or-enum",
+      "source_url": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-content-filters.html",
+      "source_quote": "Select None, Low, Medium, or High for the level of filtration you want to apply to each category."
+    },
+    {
+      "name": "injection_action",
+      "value": "reject",
+      "basis": "catalog-default",
+      "label": "opinionated baseline, not vendor-backed"
+    }
+  ]
+}
+```
+
+From the same run's `exceptions.md`:
+
+```text
+| Tier | Controls |
+|---|---|
+| grounded (quote verified on the vendor page and judged SUPPORTED) | 9 |
+| catalog-default (catalog baseline values only, NOT vendor-backed) | 38 |
+| excluded (not applicable to this profile) | 23 |
+
+Parameters: 11 vendor-grounded, 65 catalog-default (opinionated baseline, not vendor-backed).
+```
+
+## Evidence tiers
+
+| Tier | Meaning |
+|---|---|
+| `grounded` | At least one value has a vendor quote that was found on the page and judged SUPPORTED. Each such value carries a `source_kind`. |
+| `catalog-default` | Values come from the catalog's recommended defaults: an opinionated baseline, not vendor-backed. |
+| `excluded` | The control does not apply to this profile; the reason is recorded. |
+
+Values with `source_kind: example-config` come from a vendor example block. They are examples, not recommendations.
+
+## Measured results
+
+Grounded controls out of selected controls, min-max across all 12 runs in [bench/guardrail/results.tsv](bench/guardrail/results.tsv) (4 per golden profile, default models). Counting unit: controls.
+
+| Golden profile | Selected controls | Grounded (min-max) |
+|---|---|---|
+| `rag-chatbot` | 47 of 70 | 4-12 |
+| `tool-agent` | 36 of 70 | 3-7 |
+| `memory-assistant` | 45 of 70 | 3-11 |
+
+Results vary between runs. Most of a policy is `catalog-default`.
+
+## Outputs
+
+Each run writes to `outputs/<timestamp>-guardrail-<profile>/`:
+
+| File | Content |
+|---|---|
+| `policy.json` | Canonical policy with tiers, values, sources and source kinds |
+| `exceptions.md` | Tier counts, waivers, catalog-default controls, dropped proposals |
+| `tests.jsonl` | At least one test case per selected control |
+| `evidence.json` | Counts, verdicts, timings and the `check-policy.py` result |
+| `review.json` | Reviewer findings (empty with `--no-llm`) |
+| `bedrock-guardrail.json`, `bedrock-report.md` | Amazon Bedrock Guardrails draft; the report lists what was not rendered |
+| `nemo-config.yml`, `nemo-report.md` | NVIDIA NeMo Guardrails draft; the report lists what was not rendered |
+
+## Settings
+
+Set in `.env` or on the command line (the command line wins).
 
 | Variable | Default |
 |---|---|
 | `SPECIALIST_MODEL` | `nemotron-3-nano:30b-cloud` |
 | `JUDGE_MODEL` | `gpt-oss:120b-cloud` |
 | `REVIEWER_MODEL` | `nemotron-3-super:cloud` |
-| `GUARDRAIL_PARALLEL` | `4` (max 7) |
-| `GUARDRAIL_BACKOFF_SECONDS` | `5` (exponential, max 3 retries) |
-| `GUARDRAIL_CONTEXT_CHARS` | `24000` |
-| `GUARDRAIL_CACHE_DAYS` | `7` (start-page cache under `fetched/guardrail/`) |
+| `RESEARCH_MODEL` / `WRITER_MODEL` | `nemotron-3-super:cloud` |
+| `OLLAMA_BASE_URL` | `http://localhost:11434/v1` |
 
-### Roadmap
+Full list (including `GUARDRAIL_PARALLEL`, `SAFETY`, `MODE`, `CFG`, `ALLOW_LOCAL_MODELS`): [docs/settings.md](docs/settings.md).
 
-- Deterministic extraction of enums and ranges from API reference schemas.
-- Harmonize the tenant assistant template with the cloud-only rule (separate PR).
+## Docs briefing tool
 
----
-
-## Tenant assistant (experimental)
-
-Read-only questions about your own Prisma Cloud / Cortex Cloud tenants. Fill the
-`PRISMA_*` and `CORTEX_*` values in `.env` with **read-only** keys, then:
+Ask about Prisma Cloud or Cortex Cloud, for example migrating from Prisma Cloud to Cortex Cloud. A researcher model extracts facts with quotes from official pages, a script checks each quote, a judge checks support, and a writer uses supported facts only.
 
 ```bash
-scripts/gen-tenant-config.sh && eval "$(scripts/prisma-login.sh)"
-docker-agent run --exec --env-from-file .env agents/tenant-readonly.local.yaml "List my cloud accounts in both tenants"
+scripts/run.sh "Why migrate from Prisma Cloud to Cortex Cloud?"
 ```
 
-`agents/tenant-readonly.local.yaml` is generated at runtime by `scripts/gen-tenant-config.sh`
-and is not tracked until it exists.
-
-Not yet tested against a live tenant. Tenant data is sent to the model provider.
+Configs, Docker usage, output and exit codes: [docs/docs-briefing.md](docs/docs-briefing.md). The read-only tenant assistant is experimental and untested against a live tenant; see [docs/docs-briefing.md](docs/docs-briefing.md#tenant-assistant-experimental).
 
 ## Making changes
 
-`agents/*.yaml` are generated; do not edit them. For the docs briefing, edit
-`templates/agent.yaml.tmpl`, `templates/scopes/*.txt` or `seeds/*.txt`. For the
-guardrail generator, edit `seeds/guardrail-catalog.json`, `schemas/`,
-`scripts/guardrail*.py`, `scripts/check-policy.py`, `scripts/render-*.py` or
-`templates/guardrail-agent.yaml.tmpl`. Then:
+`agents/*.yaml` are generated; never edit them by hand. Edit the sources instead:
+
+- Docs briefing: `templates/agent.yaml.tmpl`, `templates/scopes/*-hub.txt`, `seeds/*.txt`
+- Guardrail generator: `templates/guardrail-agent.yaml.tmpl`, `templates/scopes/guardrail-*.txt`, `seeds/guardrail-catalog.json`, `schemas/`
+
+Then regenerate and test:
 
 ```bash
-git checkout -b my-change
-python3 scripts/gen-configs.py                  # regenerate agents/*.yaml
+python3 scripts/gen-configs.py
 python3 -m unittest discover -s tests
-scripts/check-seeds.sh                           # nightly seed-URL check
-bench/guardrail/check-golden.sh                  # guardrail golden + mutations
-bench/run-all.sh                                 # ~25 min, appends to bench/results.tsv
-git commit -am "..." && git push -u origin my-change   # open a PR; CI must pass
+bench/guardrail/check-golden.sh
 ```
 
-Compare new rows in `bench/guardrail/results.tsv` with the previous ones before merging.
-Put expected answers in `bench/questions.txt`, not in prompts. Keep doc examples
-honest about what a single run proves.
+`check-golden.sh` makes no model calls. Live benchmarks: `bench/guardrail/run-live.sh` (guardrail) and `bench/run-all.sh` (briefing). Compare new rows in the `results.tsv` files with earlier rows before merging. Expected answers belong in `bench/`, not in prompts.
 
-## Layout
+## Limitations and roadmap
 
-```
-agents/        generated configs                  templates/   prompt templates
-docs/          architecture.md                    scripts/     pipeline, checks, generators
-seeds/         start pages + catalog              tests/       unit tests (no model calls)
-bench/         benchmarks + results.tsv           bench/guardrail/ golden profiles + checks
-fetched/       cached pages (gitignored)
-outputs/       briefings + policies (gitignored)
-logs/          run logs (gitignored)
-```
+- Output is advisory. A human must review every control, value and test before use.
+- Grounding varies between runs; treat one run as a draft.
+- The judge can pass weak values. Value-type checks (type, range, enum, number in quote) reduce this but do not remove it.
+- A partly supported proposal is dropped, not partly applied.
+- Bedrock denied topics need human-written definitions.
+- MITRE ATLAS links point to the site root.
+- Prisma AIRS grounding is thin.
 
-## Safety and limitations
-
-- Agents can only fetch pages from `cortex-docs.paloaltonetworks.com`,
-  `docs.paloaltonetworks.com`, `www.paloaltonetworks.com`, `docs.prismacloud.io`,
-  `pan.dev`, `docs.aws.amazon.com`, `docs.nvidia.com`, `genai.owasp.org` and
-  `atlas.mitre.org`. Write, exec and shell tools are denied.
-- Answers and policies are only as current as the cited docs.
-- If a run fails, rerun once (models vary). Connection errors: check Ollama and
-  `OLLAMA_BASE_URL`. `401` from a `:cloud` model: `ollama signin`.
+Roadmap: extract enums and ranges from vendor API schemas; make the tenant assistant template cloud-only; rename the repository.
 
 ## License
 
