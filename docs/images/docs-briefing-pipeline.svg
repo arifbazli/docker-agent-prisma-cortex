@@ -1,0 +1,41 @@
+<svg viewBox="0 0 1000 200" width="1000" height="200" role="img">
+  <rect width="1000" height="200" fill="#ffffff"/>
+  <defs>    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth">      <path d="M0,0 L0,7 L9,3.5 z" fill="#555555"/>    </marker>  </defs>
+  <line x1="150" y1="99" x2="162" y2="99" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="282" y1="99" x2="294" y2="99" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="414" y1="99" x2="426" y2="99" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="546" y1="99" x2="558" y2="99" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="678" y1="99" x2="690" y2="99" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="810" y1="99" x2="822" y2="99" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="30" y="75" width="120" height="48" rx="8" ry="8" fill="#9ca3af" stroke="#333333" stroke-width="1.5"/>
+  <text x="90" y="103" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">question</text>
+  <rect x="162" y="75" width="120" height="48" rx="8" ry="8" fill="#f59e0b" stroke="#333333" stroke-width="1.5"/>
+  <text x="222" y="96" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">researcher
+    <tspan x="222" dy="15">RESEARCH_MODEL</tspan>
+  </text>
+  <rect x="294" y="75" width="120" height="48" rx="8" ry="8" fill="#2563eb" stroke="#333333" stroke-width="1.5"/>
+  <text x="354" y="96" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#ffffff">quote check
+    <tspan x="354" dy="15">on fetched page</tspan>
+  </text>
+  <rect x="426" y="75" width="120" height="48" rx="8" ry="8" fill="#f59e0b" stroke="#333333" stroke-width="1.5"/>
+  <text x="486" y="96" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">judge
+    <tspan x="486" dy="15">JUDGE_MODEL</tspan>
+  </text>
+  <rect x="558" y="75" width="120" height="48" rx="8" ry="8" fill="#f59e0b" stroke="#333333" stroke-width="1.5"/>
+  <text x="618" y="96" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">writer
+    <tspan x="618" dy="15">WRITER_MODEL</tspan>
+  </text>
+  <rect x="690" y="75" width="120" height="48" rx="8" ry="8" fill="#2563eb" stroke="#333333" stroke-width="1.5"/>
+  <text x="750" y="103" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#ffffff">check briefing</text>
+  <rect x="822" y="75" width="120" height="48" rx="8" ry="8" fill="#9ca3af" stroke="#333333" stroke-width="1.5"/>
+  <text x="882" y="96" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">briefing and
+    <tspan x="882" dy="15">evidence</tspan>
+  </text>
+  <rect x="10" y="158" width="16" height="16" rx="3" ry="3" fill="#9ca3af" stroke="#333333" stroke-width="1"/>
+  <text x="32" y="171" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">data</text>
+  <rect x="80" y="158" width="16" height="16" rx="3" ry="3" fill="#2563eb" stroke="#333333" stroke-width="1"/>
+  <text x="102" y="171" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">script (blue)</text>
+  <rect x="200" y="158" width="16" height="16" rx="3" ry="3" fill="#f59e0b" stroke="#333333" stroke-width="1"/>
+  <text x="222" y="171" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">cloud LLM step (amber)</text>
+  <text x="440" y="171" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">Blue script, amber cloud LLM, grey data.</text>
+</svg>
