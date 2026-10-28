@@ -8,3 +8,6 @@ date	commit	profile	specialist_model	judge_model	seconds	exit	controls_selected	
 2026-10-28	899c855	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	96.5	0	47	7	40	23	9	PASS	Step 6 measurement 3/3
 2026-10-28	899c855	tool-agent	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	84.0	0	36	3	33	34	3	PASS	Step 6 measurement 3/3
 2026-10-28	899c855	memory-assistant	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	86.5	0	45	11	34	25	15	PASS	Step 6 measurement 3/3
+2026-10-28	4c4742d	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	986.0	0	47	9	38	23	11	PASS	Sanity run at HEAD, one run per profile
+2026-10-28	4c4742d	tool-agent	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	389.7	0	36	7	29	34	9	PASS	Sanity run at HEAD, one run per profile
+2026-10-28	4c4742d	memory-assistant	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	323.8	0	45	3	42	25	3	PASS	Sanity run at HEAD, one run per profile
