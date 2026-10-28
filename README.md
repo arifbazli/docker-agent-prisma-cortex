@@ -147,22 +147,26 @@ python3 scripts/guardrail.py bench/guardrail/rag-chatbot.profile.json
 bench/guardrail/check-golden.sh
 ```
 
-### Example output (rag-chatbot gold profile, default model, 3 runs)
+### Measured grounding (3 runs per golden profile, default cloud models)
 
-Measured counting unit: **controls** (47 selected out of 70; excluded controls
-carry a reason; 20 categories waived only when a category has no applicable control).
+Counting unit: **controls** (one grounded control = at least one vendor-grounded
+parameter; parameters and proposals are reported separately; results vary
+between runs). Ranges are min-max of grounded controls out of selected controls.
 
-| Run | Grounded controls | Vendor-grounded parameters |
-|---|---|---|
-| 1 | 4  | 6  |
-| 2 | 12 | 13 |
-| 3 | 7  | 9  |
+| Golden profile | Selected controls | Grounded runs (of selected) | Min-max grounded |
+|---|---|---|---|
+| `rag-chatbot.profile.json` | 47 of 70 (this profile only) | 4, 12, 7 | 4-12 |
+| `tool-agent.profile.json` | 36 of 70 | 4, 3, 3 | 3-4 |
+| `memory-assistant.profile.json` | 45 of 70 | 6, 5, 11 | 5-11 |
 
-Range across the three runs: **4-12 grounded controls** (median 7).
-Most of a policy is `catalog-default` - an opinionated baseline from
-`recommended_defaults`, not vendor-backed. Golden-profile checks
-(`bench/guardrail/check-golden.sh`) pass; a mutation check on each run catches a
-removed control, a duplicate, a mistyped value, or a default trying to cite a source.
+`47 of 70` applies to the RAG-chatbot golden profile only; the other profiles select
+different subsets and exclusions. Runs above were captured at commit `899c855`;
+later commits on `guardrail-policy-generator` only add source-kind labelling and
+documentation, which do not change grounding. Most of a policy is `catalog-default` -
+an opinionated baseline from `recommended_defaults`, not vendor-backed. Golden-profile
+checks (`bench/guardrail/check-golden.sh`) pass; a mutation check on each run
+catches a removed control, a duplicate, a mistyped value, or a default trying to cite
+a source.
 
 ### Example output files
 
