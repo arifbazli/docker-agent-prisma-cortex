@@ -36,10 +36,13 @@ class DiagramFiles(unittest.TestCase):
                                 and e.get("width") and e.get("height")
                                 for e in rects), f"{name}: no white background rect")
             text = data.lower()
-            self.assertNotIn("<script", text)
-            self.assertNotIn("<foreignobject", text)
-            self.assertNotIn("http://", text)
-            self.assertNotIn("https://", text)
+            # The standard SVG namespace declaration is allowed; any other
+            # http(s) reference is not.
+            check = text.replace('xmlns="http://www.w3.org/2000/svg"', "")
+            self.assertNotIn("<script", check)
+            self.assertNotIn("<foreignobject", check)
+            self.assertNotIn("http://", check)
+            self.assertNotIn("https://", check)
 
     def test_guardrail_labels(self):
         data = self.read("guardrail-pipeline.svg").decode("ascii")
