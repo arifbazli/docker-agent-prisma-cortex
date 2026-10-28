@@ -86,6 +86,9 @@ def check(policy: dict, catalog: dict, tests: list | None = None, expected: dict
                 if not url or not quote:
                     errors.append(f"{where}: vendor-grounded value without source_url and source_quote")
                     continue
+                if p.get("source_kind") not in {"documented-default", "documented-limit-or-enum", "example-config", "other"}:
+                    errors.append(f"{where}: vendor-grounded value needs a valid source_kind")
+                    continue
                 if P.banned_url(url):
                     errors.append(f"{where}: {P.banned_url(url)}")
                 _, why = GV.check_value(spec, p["value"], quote)
@@ -94,6 +97,8 @@ def check(policy: dict, catalog: dict, tests: list | None = None, expected: dict
                     errors.append(f"{where}: catalog-default value must be labelled '{GP.DEFAULT_LABEL}'")
                 if p.get("source_url") or p.get("source_quote"):
                     errors.append(f"{where}: catalog-default value must not cite a vendor source")
+                if "source_kind" in p:
+                    errors.append(f"{where}: catalog-default value must not carry a source_kind")
                 _, why = GV.check_value(spec, p["value"])
             if why:
                 errors.append(f"{where}: value type: {why}")

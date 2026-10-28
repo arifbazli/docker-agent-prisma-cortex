@@ -86,6 +86,7 @@ DEFAULTS = {
     "JUDGE_MODEL": "gpt-oss:120b-cloud",
 }
 MODEL_VARS = ("ROUTER_MODEL", "SPECIALIST_MODEL", "REVIEWER_MODEL", "JUDGE_MODEL")
+SOURCE_KINDS = {"documented-default", "documented-limit-or-enum", "example-config", "other"}
 PARAM_NAME = re.compile(r"^[a-z][a-z0-9_]{0,59}$")
 PARALLEL_DEFAULT, PARALLEL_MAX = 4, 7
 RETRY_TRIES = 3
@@ -260,6 +261,30 @@ def sources_block(pages: list[P.Page], controls: list[dict], budget: int) -> tup
 
 
 # --------------------------------------------------------------------------
+# Source kind classification (guardrail vendor values)
+# --------------------------------------------------------------------------
+EXAMPLE_MARKERS = ("example", "sample", "```")
+
+
+def classify_source_kind(quote: str, page_text: str | None, specialist_kind: str | None) -> str:
+    """Return a source_kind. A quote that sits in an example/sample config block
+    on the page is forced to "example-config" regardless of the specialist's claim."""
+    kind = specialist_kind if specialist_kind in SOURCE_KINDS else "other"
+    if page_text:
+        idx = page_text.find(quote)
+        if idx >= 0:
+            before = page_text[:idx]
+            # fenced code block detection: odd number of ``` before the quote
+            if before.count("```") % 2 == 1:
+                return "example-config"
+            window = before[-600:] + page_text[idx:idx + max(60, len(quote))]
+            low = window.lower()
+            if any(m in low for m in ("example", "sample")):
+                return "example-config"
+    return kind
+
+
+# --------------------------------------------------------------------------
 # Prompts
 # --------------------------------------------------------------------------
 control_line = SEL.control_line
@@ -368,7 +393,10 @@ def parse_proposals(text: str, value_types: dict[str, dict]) -> tuple[list[dict]
             if why:
                 bad.append({"item": one, "reason": f"value type check: {why}"})
                 continue
-            ok.append({"control_id": cid, "parameters": {key: norm},
+            sk = item.get("source_kind")
+            if sk not in SOURCE_KINDS:
+                sk = "other"
+            ok.append({"control_id": cid, "parameters": {key: norm}, "source_kind": sk,
                        "rationale": str(item.get("rationale") or "").strip(),
                        "source_url": P.clean_url(url), "source_quote": quote_clean})
     return ok, bad, nulls
@@ -569,6 +597,7 @@ def main(argv=None) -> int:
     # Quote check uses the provided pages (full text) plus anything a
     # specialist fetched itself despite the instructions.
     pages = [p for p in page_cache.values() if p.ok] + [p for r in runs.values() for p in r.pages]
+    text_by_url = {p.url: p.body for p in pages if p.ok and getattr(p, "body", None)}
     evidence["pages"] = P.save_pages([p for r in runs.values() for p in r.pages], ROOT / "fetched")
     proposals = []
     for cat, r in runs.items():
@@ -576,6 +605,8 @@ def main(argv=None) -> int:
         evidence["no_vendor_value"] += nulls
         proposals += ok
         evidence["rejected"] += [dict(b, category=cat) for b in bad]
+    for pr in proposals:
+        pr["source_kind"] = classify_source_kind(pr.get("source_quote", ""), text_by_url.get(pr.get("source_url", "")), pr.get("source_kind"))
     (out / "specialists.json").write_text(json.dumps(proposals, indent=2) + "\n", encoding="utf-8")
     log(f"specialists: {len(proposals)} proposal(s), {len(evidence['rejected'])} rejected as malformed")
 

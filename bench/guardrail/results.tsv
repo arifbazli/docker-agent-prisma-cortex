@@ -1,9 +1,10 @@
 date	commit	profile	specialist_model	judge_model	seconds	exit	controls_selected	controls_grounded	controls_catalog_default	controls_excluded	params_vendor_grounded	check_policy	note
-2026-10-27	53332d5	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	226.1	0	47	7	40	23	9	not-run	rag-chatbot comparison: before (broad prompt) nano
-2026-10-27	53332d5	rag-chatbot	nemotron-3-super:cloud	gpt-oss:120b-cloud	214.3	0	47	5	42	23	6	not-run	rag-chatbot comparison: before (broad prompt) super
-2026-10-27	53332d5	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	166.4	0	47	2	45	23	3	not-run	rag-chatbot comparison: after v1 (per-key, null-biased) nano
-2026-10-27	53332d5	rag-chatbot	nemotron-3-super:cloud	gpt-oss:120b-cloud	106.7	0	47	4	43	23	6	not-run	rag-chatbot comparison: after v1 (per-key, null-biased) super
-2026-10-27	53332d5	rag-chatbot	nemotron-3-super:cloud	gpt-oss:120b-cloud	174.1	0	47	6	41	23	8	PASS	run-live (Step 5 code, run before it was committed)
-2026-10-27	53332d5	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	328.4	0	47	7	40	23	12	PASS	run-live (Step 5 code, run before it was committed)
-2026-10-27	53332d5	tool-agent	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	170.6	0	36	4	32	34	4	PASS	run-live (Step 5 code, run before it was committed)
-2026-10-27	53332d5	memory-assistant	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	320.3	0	45	4	41	25	6	PASS	run-live (Step 5 code, run before it was committed)
+2026-10-28	899c855	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	1127.7	0	47	4	43	23	6	PASS	Step 6 measurement 1/3
+2026-10-28	899c855	tool-agent	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	474.2	0	36	4	32	34	7	PASS	Step 6 measurement 1/3
+2026-10-28	899c855	memory-assistant	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	555.5	0	45	6	39	25	8	PASS	Step 6 measurement 1/3
+2026-10-28	899c855	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	219.6	0	47	12	35	23	13	PASS	Step 6 measurement 2/3
+2026-10-28	899c855	tool-agent	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	125.0	0	36	3	33	34	3	PASS	Step 6 measurement 2/3
+2026-10-28	899c855	memory-assistant	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	135.0	0	45	5	40	25	7	PASS	Step 6 measurement 2/3
+2026-10-28	899c855	rag-chatbot	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	96.5	0	47	7	40	23	9	PASS	Step 6 measurement 3/3
+2026-10-28	899c855	tool-agent	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	84.0	0	36	3	33	34	3	PASS	Step 6 measurement 3/3
+2026-10-28	899c855	memory-assistant	nemotron-3-nano:30b-cloud	gpt-oss:120b-cloud	86.5	0	45	11	34	25	15	PASS	Step 6 measurement 3/3

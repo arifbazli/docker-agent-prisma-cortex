@@ -173,6 +173,16 @@
                     "opinionated baseline, not vendor-backed"
                   ],
                   "description": "Required for basis catalog-default (checked by scripts/check-policy.py)."
+                },
+                "source_kind": {
+                  "type": "string",
+                  "enum": [
+                    "documented-default",
+                    "documented-limit-or-enum",
+                    "example-config",
+                    "other"
+                  ],
+                  "description": "Required for basis vendor-grounded. example-config means the value came from a vendor docs example/sample config, not a recommendation."
                 }
               }
             },
