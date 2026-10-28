@@ -45,21 +45,44 @@ A live guardrail run takes several minutes per profile; a briefing takes a few m
 
 ```mermaid
 flowchart LR
-    Profile["sanitized app profile"]:::data --> Select["select-controls.py"]:::script
-    Catalog["guardrail-catalog.json<br/>70 controls"]:::data --> Select
-    Select --> Spec["7 category specialists<br/>SPECIALIST_MODEL"]:::llm
-    Spec --> Values["value-type check"]:::script
-    Values --> Quote["quote check on fetched page"]:::script
-    Quote --> Judge["judge<br/>JUDGE_MODEL"]:::llm
-    Judge --> Policy["policy.json"]:::data
-    Policy --> Asm["assembler: tests<br/>REVIEWER_MODEL"]:::llm
-    Policy --> Render["render-bedrock / render-nemo"]:::script
-    Policy --> Check["check-policy.py"]:::script
+    Profile[app profile]
+    Catalog[guardrail catalog]
+    Select[select controls]
+    Spec[category specialists]
+    Values[value type check]
+    Quote[quote check]
+    Judge[judge]
+    Policy[policy json]
+    Asm[assembler tests]
+    Render[render files]
+    Check[check policy]
+
+    Profile --> Select
+    Catalog --> Select
+    Select --> Spec
+    Spec --> Values
+    Values --> Quote
+    Quote --> Judge
+    Judge --> Policy
+    Policy --> Asm
+    Policy --> Render
+    Policy --> Check
 
     classDef script fill:#2563eb,color:#fff,stroke:#1e40af
-    classDef llm fill:#f59e0b,color:#000,stroke:#b45309
+    classDef ai fill:#f59e0b,color:#000,stroke:#b45309
     classDef data fill:#9ca3af,color:#000,stroke:#6b7280
+    class Select,Values,Quote,Render,Check script
+    class Spec,Judge,Asm ai
+    class Profile,Catalog,Policy data
 ```
+
+Amber steps (LLM) and their model settings:
+
+| Amber step | Model setting |
+|---|---|
+| category specialists | `SPECIALIST_MODEL` |
+| judge | `JUDGE_MODEL` |
+| assembler tests | `REVIEWER_MODEL` |
 
 Blue = script, amber = LLM step (with its model variable), grey = data.
 

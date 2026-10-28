@@ -10,25 +10,29 @@ Python, source pages fetched by scripts, JSON data files, generated agent config
 
 ```mermaid
 flowchart TB
-    subgraph Config["Configuration"]
-        T["templates/*.yaml.tmpl + templates/scopes/*.txt"]
-        G["scripts/gen-configs.py"]
-        A["agents/*.yaml (generated)"]
-        T --> G --> A
-    end
+    Tmp[templates and scopes]
+    Gen[gen configs]
+    Agents[agents yaml]
+    Seeds[start pages]
+    Quest[question]
+    Brief[briefing and evidence]
+    Catalog[guardrail catalog and schemas]
+    Prof[sanitized profile]
+    Pol[policy and drafts]
 
-    subgraph Briefing["Docs briefing (scripts/run.sh, scripts/pipeline.py)"]
-        Q["question"] --> B["briefing.md + evidence.json"]
-    end
+    Tmp --> Gen
+    Gen --> Agents
+    Agents --> Brief
+    Agents --> Pol
+    Seeds --> Brief
+    Catalog --> Pol
+    Quest --> Brief
+    Prof --> Pol
 
-    subgraph Guardrail["Guardrail generator (scripts/guardrail.py)"]
-        Prof["sanitized profile"] --> Pol["policy.json + tests + renderer drafts"]
-    end
-
-    Seeds["seeds/*.txt (start pages)"] --> Briefing
-    Cat["seeds/guardrail-catalog.json + schemas/*.json"] --> Guardrail
-    A --> Briefing
-    A --> Guardrail
+    classDef script fill:#2563eb,color:#fff,stroke:#1e40af
+    classDef data fill:#9ca3af,color:#000,stroke:#6b7280
+    class Gen script
+    class Tmp,Agents,Seeds,Quest,Catalog,Prof,Pol,Brief data
 ```
 
 ## Docs briefing pipeline
@@ -37,17 +41,36 @@ Blue = script, amber = LLM step (with its model variable), grey = data.
 
 ```mermaid
 flowchart LR
-    Q["question"]:::data --> R["researcher<br/>RESEARCH_MODEL"]:::llm
-    R --> QC["quote check on fetched page"]:::script
-    QC --> J["judge<br/>JUDGE_MODEL"]:::llm
-    J --> W["writer<br/>WRITER_MODEL"]:::llm
-    W --> C["check-briefing.sh"]:::script
-    C --> B["outputs/run.md + evidence.json"]:::data
+    Quest[question]
+    Res[researcher]
+    Qc[quote check]
+    Judge[judge]
+    Writer[writer]
+    Chk[check briefing]
+    Out[briefing and evidence]
+
+    Quest --> Res
+    Res --> Qc
+    Qc --> Judge
+    Judge --> Writer
+    Writer --> Chk
+    Chk --> Out
 
     classDef script fill:#2563eb,color:#fff,stroke:#1e40af
-    classDef llm fill:#f59e0b,color:#000,stroke:#b45309
+    classDef ai fill:#f59e0b,color:#000,stroke:#b45309
     classDef data fill:#9ca3af,color:#000,stroke:#6b7280
+    class Qc,Chk script
+    class Res,Judge,Writer ai
+    class Quest,Out data
 ```
+
+Amber steps (LLM) and their model settings:
+
+| Amber step | Model setting |
+|---|---|
+| researcher | `RESEARCH_MODEL` |
+| judge | `JUDGE_MODEL` |
+| writer | `WRITER_MODEL` |
 
 `MODE=agent` replaces the scripted steps with a root agent on `ROUTER_MODEL` inside
 docker-agent. Details: [docs-briefing.md](docs-briefing.md).
