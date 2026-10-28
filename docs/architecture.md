@@ -8,6 +8,11 @@ Python, source pages fetched by scripts, JSON data files, generated agent config
 
 ## Repository overview
 
+![Repository overview](images/repo-overview.svg)
+
+<details>
+<summary>Mermaid source</summary>
+
 ```mermaid
 flowchart TB
     subgraph Config["Configuration"]
@@ -31,9 +36,26 @@ flowchart TB
     A --> Guardrail
 ```
 
+</details>
+
 ## Docs briefing pipeline
 
 Blue = script, amber = LLM step (with its model variable), grey = data.
+
+![Docs briefing pipeline](images/docs-briefing-pipeline.svg)
+
+Amber steps (LLM) and their model settings:
+
+| Amber step | Model setting |
+|---|---|
+| Researcher | RESEARCH_MODEL |
+| Judge | JUDGE_MODEL |
+| Writer | WRITER_MODEL |
+
+Legend: amber = cloud LLM step, blue = script, grey = data.
+
+<details>
+<summary>Mermaid source</summary>
 
 ```mermaid
 flowchart LR
@@ -48,6 +70,8 @@ flowchart LR
     classDef llm fill:#f59e0b,color:#000,stroke:#b45309
     classDef data fill:#9ca3af,color:#000,stroke:#6b7280
 ```
+
+</details>
 
 `MODE=agent` replaces the scripted steps with a root agent on `ROUTER_MODEL` inside
 docker-agent. Details: [docs-briefing.md](docs-briefing.md).

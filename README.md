@@ -43,6 +43,21 @@ A live guardrail run takes several minutes per profile; a briefing takes a few m
 
 ## How it works
 
+![Guardrail pipeline](docs/images/guardrail-pipeline.svg)
+
+Amber steps (LLM) and their model settings:
+
+| Amber step | Model setting |
+|---|---|
+| Specialists | SPECIALIST_MODEL |
+| Judge | JUDGE_MODEL |
+| Assembler | REVIEWER_MODEL |
+
+Legend: amber = cloud LLM step, blue = script, grey = data.
+
+<details>
+<summary>Mermaid source</summary>
+
 ```mermaid
 flowchart LR
     Profile["sanitized app profile"]:::data --> Select["select-controls.py"]:::script
@@ -60,6 +75,9 @@ flowchart LR
     classDef llm fill:#f59e0b,color:#000,stroke:#b45309
     classDef data fill:#9ca3af,color:#000,stroke:#6b7280
 ```
+
+</details>
+
 
 Blue = script, amber = LLM step (with its model variable), grey = data.
 
