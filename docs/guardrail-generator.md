@@ -47,6 +47,70 @@ Golden profiles: [rag-chatbot](../bench/guardrail/rag-chatbot.profile.json),
    validates the policy; [render-bedrock.py](../scripts/render-bedrock.py) and
    [render-nemo.py](../scripts/render-nemo.py) write drafts.
 
+## Output files
+
+Each run writes `outputs/<timestamp>-guardrail-<profile>/`; `outputs/.last-guardrail` holds the latest path.
+
+| File | Content |
+|---|---|
+| `policy.json` | Controls with tiers, values, sources and source kinds |
+| `exceptions.md` | Tier counts, waivers, catalog-default controls, dropped proposals |
+| `tests.jsonl` | At least one test case per selected control |
+| `evidence.json` | Counts, verdicts, timings and the `check-policy.py` result |
+| `review.json` | Reviewer findings (empty with `--no-llm`) |
+| `bedrock-guardrail.json`, `bedrock-report.md` | Amazon Bedrock Guardrails draft and what could not be rendered |
+| `nemo-config.yml`, `nemo-report.md` | NVIDIA NeMo Guardrails draft and what could not be rendered |
+
+## Example output
+
+Trimmed from a live run on the `rag-chatbot` golden profile. One control from `policy.json`:
+
+```json
+{
+  "control_id": "INPUT-10",
+  "name": "Injection screening",
+  "tier": "grounded",
+  "parameters": [
+    {
+      "name": "prompt_attack_strength",
+      "value": "LOW",
+      "basis": "vendor-grounded",
+      "source_kind": "documented-limit-or-enum",
+      "source_url": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-content-filters.html",
+      "source_quote": "Select None, Low, Medium, or High for the level of filtration you want to apply to each category."
+    },
+    {
+      "name": "injection_action",
+      "value": "reject",
+      "basis": "catalog-default",
+      "label": "opinionated baseline, not vendor-backed"
+    }
+  ]
+}
+```
+
+The summary from the same run's `exceptions.md`:
+
+```text
+| Tier | Controls |
+|---|---|
+| grounded (quote verified on the vendor page and judged SUPPORTED) | 9 |
+| catalog-default (catalog baseline values only, NOT vendor-backed) | 38 |
+| excluded (not applicable to this profile) | 23 |
+```
+
+## Measured results
+
+Grounded controls out of selected controls across all 12 runs in [bench/guardrail/results.tsv](../bench/guardrail/results.tsv) (4 per golden profile, default models):
+
+| Golden profile | Selected | Grounded (min-max) |
+|---|---|---|
+| `rag-chatbot` | 47 of 70 | 4-12 |
+| `tool-agent` | 36 of 70 | 3-7 |
+| `memory-assistant` | 45 of 70 | 3-11 |
+
+Results vary between runs, and most of every policy is `catalog-default`.
+
 ## Evidence tiers
 
 - **grounded**: at least one value is vendor-grounded (quote on the page, judged
@@ -95,3 +159,15 @@ topics need human-written definitions.
   claiming a source) that must fail.
 - [run-live.sh](../bench/guardrail/run-live.sh) and [record.py](../bench/guardrail/record.py):
   live runs; one row per run in [results.tsv](../bench/guardrail/results.tsv).
+## Limitations
+
+- Output is advisory. A human must review every control, value and test before use.
+- Grounding varies between runs; treat a run as a draft.
+- The judge can pass weak values; the value checks reduce this but do not remove it.
+- A partly supported proposal is dropped, not partly applied.
+- Bedrock denied topics need human-written definitions.
+- MITRE ATLAS links point to the site root.
+- Prisma AIRS grounding is thin.
+
+Roadmap: extract enums and ranges from vendor API schemas; make the tenant assistant template cloud-only.
+
