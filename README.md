@@ -23,6 +23,14 @@ Everything else is clearly labeled as a catalog default, an opinionated baseline
 
 Both run on [docker-agent](https://github.com/docker/docker-agent) with Ollama cloud models and share the same quote check and judge.
 
+## How the repository works
+
+![How the repository works](docs/images/repo-overview.svg)
+
+- **Build:** templates and seeds are turned into the docker-agent configs in `agents/` by `scripts/gen-configs.py`. No model calls.
+- **Run:** each tool sends its work through the same engine: Ollama cloud models propose, a script checks every quote on the fetched page, and a judge from a different model family decides whether the quote supports the claim.
+- **Output:** the guardrail generator writes a policy folder; the docs briefing writes a cited Markdown briefing.
+
 ## Requirements
 
 - `bash`, `curl`, `python3` 3.9+ (standard library only, nothing to `pip install`)
@@ -148,6 +156,8 @@ A researcher model extracts facts with quotes from official Palo Alto Networks p
 ```bash
 scripts/run.sh "Why migrate from Prisma Cloud to Cortex Cloud?"
 ```
+
+![Docs briefing pipeline](docs/images/docs-briefing-pipeline.svg)
 
 Configs, Docker, output and exit codes: [docs/docs-briefing.md](docs/docs-briefing.md). The read-only tenant assistant is experimental and untested against a live tenant ([details](docs/docs-briefing.md#tenant-assistant-experimental)).
 
