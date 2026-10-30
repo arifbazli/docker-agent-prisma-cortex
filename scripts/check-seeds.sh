@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.." || exit 2
 [ $# -eq 0 ] && set -- seeds/*.txt
 bad=0
 while read -r u; do
-  body=$(curl -sL --max-time 25 -A 'docker-agent-prisma-cortex seed check' -w '\n%{http_code}' "$u") \
+  body=$(curl -sL --max-time 25 -A 'grounded-ai-guardrails seed check' -w '\n%{http_code}' "$u") \
     || { echo "FAIL (curl) $u"; bad=1; continue; }
   code=${body##*$'\n'}
   if [ "$code" != 200 ]; then echo "FAIL $code $u"; bad=1

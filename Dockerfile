@@ -3,10 +3,10 @@
 # Models are NOT inside the image: point OLLAMA_BASE_URL at an Ollama server
 # (on the host, or the `ollama` compose profile). See compose.yaml.
 #
-#   docker build -t docker-agent-prisma-cortex .
+#   docker build -t grounded-ai-guardrails .
 #   docker run --rm --env-file .env -v "$PWD/outputs:/app/outputs" \
 #     --add-host=host.docker.internal:host-gateway \
-#     docker-agent-prisma-cortex "Why migrate from Prisma Cloud to Cortex Cloud?"
+#     grounded-ai-guardrails "Why migrate from Prisma Cloud to Cortex Cloud?"
 
 FROM python:3.12-slim
 
