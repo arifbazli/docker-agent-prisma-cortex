@@ -54,7 +54,7 @@ docker compose run --rm --build agent "Why migrate from Prisma Cloud to Cortex C
 ```
 
 Uses Ollama on the host. Prebuilt image:
-`ghcr.io/arifbazli/docker-agent-prisma-cortex:latest`. See
+`ghcr.io/arifbazli/grounded-ai-guardrails:latest`. See
 [compose.yaml](../compose.yaml) to run Ollama in a container.
 
 ## Benchmark

@@ -1,6 +1,8 @@
-# docker-agent-prisma-cortex
+# grounded-ai-guardrails
 
-Generate advisory, source-cited AI guardrail policies, and answer Prisma Cloud / Cortex Cloud questions from official documentation.
+Source-grounded AI guardrail policies: every vendor value is backed by a quote that a script found on the official page and a second model judged as supporting it. The same engine answers Prisma Cloud / Cortex Cloud questions with source-cited briefings.
+
+Formerly `docker-agent-prisma-cortex`; old GitHub links redirect here.
 
 > Independent project. Not affiliated with Palo Alto Networks, Docker, NVIDIA, AWS, OWASP or MITRE.
 
@@ -22,8 +24,8 @@ All models run on Ollama cloud; model names end in `:cloud` or `-cloud`. Nothing
 ## Quick start (no model calls)
 
 ```bash
-git clone https://github.com/arifbazli/docker-agent-prisma-cortex.git
-cd docker-agent-prisma-cortex
+git clone https://github.com/arifbazli/grounded-ai-guardrails.git
+cd grounded-ai-guardrails
 cp .env.example .env
 python3 -m unittest discover -s tests
 python3 scripts/guardrail.py --no-llm bench/guardrail/rag-chatbot.profile.json
@@ -188,7 +190,7 @@ bench/guardrail/check-golden.sh
 - MITRE ATLAS links point to the site root.
 - Prisma AIRS grounding is thin.
 
-Roadmap: extract enums and ranges from vendor API schemas; make the tenant assistant template cloud-only; rename the repository.
+Roadmap: extract enums and ranges from vendor API schemas; make the tenant assistant template cloud-only.
 
 ## License
 

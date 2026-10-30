@@ -145,7 +145,7 @@ def load_dotenv(path: Path) -> None:
 # specialists get relevant excerpts. This bounds cost and time, and the
 # quote check runs against exactly the text the specialist was given.
 # --------------------------------------------------------------------------
-USER_AGENT = "docker-agent-prisma-cortex guardrail-policy-generator (+https://github.com/arifbazli/docker-agent-prisma-cortex)"
+USER_AGENT = "grounded-ai-guardrails guardrail-policy-generator (+https://github.com/arifbazli/grounded-ai-guardrails)"
 SKIP_TAGS = {"script", "style", "nav", "header", "footer", "noscript", "svg", "form", "aside", "button", "template"}
 BLOCK_TAGS = {"p", "li", "h1", "h2", "h3", "h4", "h5", "h6", "div", "tr", "br", "section", "pre",
               "td", "th", "dd", "dt", "table", "ul", "ol", "article", "main", "blockquote"}
